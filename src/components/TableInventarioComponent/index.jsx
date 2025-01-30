@@ -74,6 +74,12 @@ function TableInventarioComponent({ movimientos }) {
                 className={classes.tableCell}
                 sx={{ color: "#fff", fontWeight: "bold" }}
               >
+                Cantidad por unidad
+              </TableCell>
+              <TableCell
+                className={classes.tableCell}
+                sx={{ color: "#fff", fontWeight: "bold" }}
+              >
                 Tipo de Movimiento
               </TableCell>
               <TableCell
@@ -94,9 +100,28 @@ function TableInventarioComponent({ movimientos }) {
             {paginatedMovimientos.map((movimiento) => (
               <React.Fragment key={movimiento.id_movimiento}>
                 <TableRow>
-                  <TableCell>{movimiento.producto.nombre}</TableCell>
+                  <TableCell
+                    sx={{
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {movimiento.producto.nombre}
+                  </TableCell>
                   <TableCell>{movimiento.cantidad}</TableCell>
-                  <TableCell>{movimiento.tipo_movimiento}</TableCell>
+                  <TableCell>
+                    {movimiento.subCantidad ? movimiento.subCantidad : "0"}
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      textTransform: "uppercase",
+                      color:
+                        movimiento.tipo_movimiento === "compra"
+                          ? "green"
+                          : "red",
+                    }}
+                  >
+                    {movimiento.tipo_movimiento}
+                  </TableCell>
                   <TableCell>
                     {new Date(movimiento.fecha_movimiento).toLocaleString()}
                   </TableCell>
@@ -144,8 +169,8 @@ function TableInventarioComponent({ movimientos }) {
                               </TableCell>
                               <TableCell>{`${movimiento.trabajadorMovimientoInventario.apellido_paterno} ${movimiento.trabajadorMovimientoInventario.apellido_materno}`}</TableCell>
                               <TableCell>
-                                {movimiento.trabajadorMovimientoInventario
-                                  .cargo || "Sin asignar"}
+                                {movimiento.trabajadorMovimientoInventario.rol
+                                  .nombre || "Sin asignar"}
                               </TableCell>
                             </TableRow>
                           </TableBody>

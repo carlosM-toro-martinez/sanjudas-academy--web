@@ -15,7 +15,7 @@ function MovimientoInventario() {
     error: errorMovimientos,
     refetch: refetchMovimientos,
   } = useQuery("movimientos-inventario", movimientoInventariosService);
-
+  console.log(movimientos);
   const { data } = useContext(MainContext);
   const navigate = useNavigate();
 
