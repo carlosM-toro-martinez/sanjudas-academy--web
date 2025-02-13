@@ -13,9 +13,9 @@ import { Navigate, Outlet } from "react-router-dom";
 function CreateVenta() {
   const { data, isLoading, error, refetch, openCaja } = useContext(MainContext);
 
-  // if (!openCaja) {
-  //   return <Navigate to="/movimiento-caja" />;
-  // }
+  if (!openCaja) {
+    return <Navigate to="/movimiento-caja" />;
+  }
 
   const {
     data: productsData,

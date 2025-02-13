@@ -240,7 +240,7 @@ function CarouselMoneyComponent({
   };
 
   return (
-    <>
+    <Box>
       {!cajaState.isCajaVacia && !cajaState.isCajaCerrada && (
         <Box
           sx={{
@@ -271,7 +271,7 @@ function CarouselMoneyComponent({
           </Button>
         </Box>
       )}
-      <div className={classes.container}>
+      <Box className={classes.container}>
         {editingEnabled &&
         !cajaState.isCajaVacia &&
         !cajaState.isCajaCerrada ? (
@@ -286,7 +286,7 @@ function CarouselMoneyComponent({
             onChange={handleDescripcionChange}
           />
         ) : null}
-        <div className={classes.total}>
+        <Box className={classes.total}>
           {editingEnabled && totalChange < 0 && (
             <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
               <h2 style={{ color: "red" }}>{totalChange.toFixed(2)}</h2>
@@ -302,17 +302,17 @@ function CarouselMoneyComponent({
               <h2 style={{ color: "green" }}>{totalChange.toFixed(2)}</h2>
             </Box>
           )}
-        </div>
+        </Box>
 
-        <div className={classes.imagesGrid}>
+        <Box className={classes.imagesGrid}>
           {denominaciones.map((denom, index) => (
-            <div key={index} className={classes.imageContainer}>
+            <Box key={index} className={classes.imageContainer}>
               <img
                 src={images[index]}
                 alt={`money-${denom.denominacion}`}
                 className={classes.image}
               />
-              <div className={classes.counterContainer}>
+              <Box className={classes.counterContainer}>
                 {editingEnabled && (
                   <>
                     <IconButton
@@ -334,10 +334,10 @@ function CarouselMoneyComponent({
                     </IconButton>
                   </>
                 )}
-              </div>
-            </div>
+              </Box>
+            </Box>
           ))}
-        </div>
+        </Box>
 
         <Box
           sx={{
@@ -370,8 +370,8 @@ function CarouselMoneyComponent({
             {snackbar.message}
           </Alert>
         </Snackbar>
-      </div>
-    </>
+      </Box>
+    </Box>
   );
 }
 

@@ -176,6 +176,40 @@ const LoteFormComponent = ({
               }}
             >
               <Checkbox
+                checked={productoConPeso}
+                onChange={(e) => {
+                  setProductoConPeso(e.target.checked);
+                  if (e.target.checked) {
+                    setCompraPorMayor(false);
+                    setCompraPorUnidad(false);
+                    setPeso(null);
+                    setSubCantidad(null);
+                    setPrecio(null);
+                    setCantidad(null);
+                  }
+                }}
+                color="primary"
+              />
+              <Typography
+                variant="body2"
+                style={{ marginTop: "4px", textAlign: "center" }}
+              >
+                Producto con peso
+              </Typography>
+            </Box>
+          }
+          label=""
+        />
+        <FormControlLabel
+          control={
+            <Box
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <Checkbox
                 checked={compraPorMayor}
                 onChange={(e) => {
                   setCompraPorMayor(e.target.checked);
@@ -245,8 +279,9 @@ const LoteFormComponent = ({
           onChange={(e) => setCantidad(e.target.value)}
           margin="normal"
           error={errors.cantidad}
+          required
           helperText={
-            compraPorMayor ? "Ej. 3 paq de hojas" : "Ej. 12 u lapiceros"
+            compraPorMayor ? "Ej. 3 paq de cocacola" : "Ej. 12 u leche gloria"
           }
           style={{ width: "70%" }}
         />
@@ -263,12 +298,33 @@ const LoteFormComponent = ({
             fullWidth
             margin="normal"
             variant="standard"
-            helperText="Ej. 500 hojas por paq."
+            required
+            helperText="Ej. 6 cocacolas por paq."
             style={{ width: "80%" }}
           />
         </Box>
       )}
 
+      {productoConPeso && (
+        <Box style={{ display: "flex", gap: 30 }}>
+          <TextField
+            id="standard-basic"
+            label="Peso Total (Kg)"
+            type="number"
+            value={peso || ""}
+            onChange={(e) => setPeso(e.target.value)}
+            fullWidth
+            margin="normal"
+            variant="standard"
+            helperText="Peso Total (Kg)"
+            required
+            InputProps={{
+              endAdornment: <InputAdornment position="end">Kg</InputAdornment>,
+            }}
+            style={{ width: "60%" }}
+          />
+        </Box>
+      )}
       {(productoConPeso || compraPorMayor || compraPorUnidad) && (
         <TextField
           label={
@@ -287,8 +343,8 @@ const LoteFormComponent = ({
             productoConPeso
               ? "Precio total"
               : compraPorMayor
-              ? "Ej. 40Bs por paq."
-              : "Ej. 3BS por unidad"
+              ? "Ej. 60Bs por paq."
+              : "Ej. 8.5BS porunidad"
           }
           InputProps={{
             endAdornment: <InputAdornment position="end">Bs</InputAdornment>,

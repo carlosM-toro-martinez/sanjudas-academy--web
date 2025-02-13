@@ -14,15 +14,20 @@ const headCells = [
     disablePadding: false,
     label: "Código de Barras",
   },
-  { id: "Cantidad", numeric: true, disablePadding: false, label: "Cantidad" },
+  {
+    id: "Cantidad",
+    numeric: true,
+    disablePadding: false,
+    label: "Cantidad (Caja/Paquete)",
+  },
   {
     id: "Cantidad (u)",
     numeric: true,
     disablePadding: false,
     label: "Cantidad (u)",
   },
-  // { id: "Peso", numeric: true, disablePadding: false, label: "Peso" },
-  // { id: "precio", numeric: true, disablePadding: false, label: "Precio" },
+  { id: "Peso", numeric: true, disablePadding: false, label: "Peso" },
+  { id: "precio", numeric: true, disablePadding: false, label: "Precio" },
   { id: "actions", numeric: true, disablePadding: false, label: "Acciones" },
 ];
 

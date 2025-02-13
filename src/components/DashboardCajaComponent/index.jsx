@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import CarouselMoneyComponent from "./CarouselMoneyComponent";
 import FormCajaComponent from "./FormCajaComponent";
-import { Box, Button } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 
 function DashboardCajaComponent({ caja, refetch }) {
   const [editingEnabled, setEditingEnabled] = useState(false);
@@ -40,8 +40,19 @@ function DashboardCajaComponent({ caja, refetch }) {
   };
 
   return (
-    <>
-      <h2 style={{ textAlign: "center", fontSize: "2rem" }}>Caja</h2>
+    <Box>
+      <Typography
+        component={"h2"}
+        style={{
+          textAlign: "center",
+          fontSize: "2rem",
+          fontWeight: "bold  ",
+          marginTop: "2rem",
+          marginBottom: "2rem",
+        }}
+      >
+        Caja
+      </Typography>
       {cajaState.isCajaVacia || cajaState.isCajaCerrada ? (
         <Box
           sx={{
@@ -62,7 +73,7 @@ function DashboardCajaComponent({ caja, refetch }) {
         setEditingEnabled={setEditingEnabled}
         cajaState={cajaState}
       />
-    </>
+    </Box>
   );
 }
 

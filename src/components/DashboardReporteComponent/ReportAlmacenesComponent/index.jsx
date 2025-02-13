@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "react-query";
 import {
   MenuItem,
@@ -8,19 +8,21 @@ import {
   InputLabel,
   Typography,
   CircularProgress,
+  Box,
 } from "@mui/material";
 import DrawerComponent from "../../DrawerComponent";
-import movimientoInventariosService from "../../../async/services/get/movimientoInventariosService.js";
+import loteService from "../../../async/services/get/loteService.js";
 import reportAlmacenesService from "../../../async/services/get/reportAlmacenesService.js";
 import TableAlmacenesReport from "./TableAlmacenesReport";
 
 function ReportAlmacenesComponent() {
   const [idInicio, setIdInicio] = useState(null);
   const [idFinal, setIdFinal] = useState(null);
+  const [fechasAgrupadas, setFechasAgrupadas] = useState([]);
 
-  const { data: movimientos, isLoading: isLoadingMovimientos } = useQuery(
-    "movimientos",
-    movimientoInventariosService
+  const { data: lotes, isLoading: isLoadingLotes } = useQuery(
+    "loteData",
+    loteService
   );
 
   const {
@@ -50,10 +52,32 @@ function ReportAlmacenesComponent() {
     }
   };
 
+  useEffect(() => {
+    if (lotes) {
+      const agrupadosPorFecha = lotes.reduce((acc, lote) => {
+        const fechaIngreso = new Date(lote.fecha_ingreso).toLocaleDateString();
+        if (!acc[fechaIngreso]) {
+          acc[fechaIngreso] = {
+            fecha: fechaIngreso,
+            primerosId: lote.id_lote,
+            ultimosId: lote.id_lote,
+          };
+        } else {
+          acc[fechaIngreso].ultimosId = lote.id_lote;
+        }
+        return acc;
+      }, {});
+
+      const fechasTratadas = Object.values(agrupadosPorFecha);
+
+      setFechasAgrupadas(fechasTratadas);
+    }
+  }, [lotes]);
+
   return (
     <DrawerComponent>
-      {!isLoadingMovimientos ? (
-        <div>
+      {!isLoadingLotes ? (
+        <Box>
           <Typography
             component={"h2"}
             style={{
@@ -63,77 +87,61 @@ function ReportAlmacenesComponent() {
               margin: "1rem 0 0 0",
             }}
           >
-            Reporte de inventario
+            Reporte de compras
           </Typography>
-          {!isLoadingMovimientos ? (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                gap: "5rem",
-                alignItems: "center",
-                marginTop: "3rem",
-              }}
-            >
-              <FormControl style={{ width: "15rem" }}>
-                <InputLabel id="select-inicio-label">
-                  Fecha de Inicio
-                </InputLabel>
-                <Select
-                  label="Fecha de Inicio"
-                  labelId="select-inicio-label"
-                  value={idInicio}
-                  onChange={handleInicioChange}
-                >
-                  {movimientos?.map((movimiento) => (
-                    <MenuItem
-                      key={movimiento.id_movimiento}
-                      value={movimiento.id_movimiento}
-                    >
-                      {new Date(
-                        movimiento.fecha_movimiento
-                      ).toLocaleDateString()}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleGenerateReport}
-                disabled={!idInicio || !idFinal}
+          <Box
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "5rem",
+              alignItems: "center",
+              marginTop: "3rem",
+            }}
+          >
+            <FormControl style={{ width: "15rem" }}>
+              <InputLabel id="select-inicio-label">Fecha de Inicio</InputLabel>
+              <Select
+                label="Fecha de Inicio"
+                labelId="select-inicio-label"
+                value={idInicio}
+                onChange={handleInicioChange}
               >
-                Generar Reporte
-              </Button>
+                {fechasAgrupadas?.map((fecha) => (
+                  <MenuItem key={fecha.fecha} value={fecha.primerosId}>
+                    {fecha.fecha}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-              <FormControl style={{ width: "15rem" }}>
-                <InputLabel id="select-final-label">Fecha Final</InputLabel>
-                <Select
-                  label="Fecha Final"
-                  labelId="select-final-label"
-                  value={idFinal}
-                  onChange={handleFinalChange}
-                >
-                  {movimientos?.map((movimiento) => (
-                    <MenuItem
-                      key={movimiento.id_movimiento}
-                      value={movimiento.id_movimiento}
-                    >
-                      {new Date(
-                        movimiento.fecha_movimiento
-                      ).toLocaleDateString()}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </div>
-          ) : (
-            <div>Cargando movimientos...</div>
-          )}
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleGenerateReport}
+              disabled={!idInicio || !idFinal}
+            >
+              Generar Reporte
+            </Button>
+
+            <FormControl style={{ width: "15rem" }}>
+              <InputLabel id="select-final-label">Fecha Final</InputLabel>
+              <Select
+                label="Fecha Final"
+                labelId="select-final-label"
+                value={idFinal}
+                onChange={handleFinalChange}
+              >
+                {fechasAgrupadas?.map((fecha) => (
+                  <MenuItem key={fecha.fecha} value={fecha.ultimosId}>
+                    {fecha.fecha}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
 
           {isLoadingReport ? (
-            <div
+            <Box
               style={{
                 display: "flex",
                 justifyContent: "center",
@@ -141,13 +149,13 @@ function ReportAlmacenesComponent() {
               }}
             >
               <CircularProgress />
-            </div>
+            </Box>
           ) : (
             reportData && <TableAlmacenesReport reportData={reportData} />
           )}
-        </div>
+        </Box>
       ) : (
-        <div>Cargando movimientos...</div>
+        <Box>Cargando lotes...</Box>
       )}
     </DrawerComponent>
   );

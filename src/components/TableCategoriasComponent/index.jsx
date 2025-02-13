@@ -191,7 +191,7 @@ function TableCategoriasComponent({ categorias, refetchCategorias }) {
                       timeout="auto"
                       unmountOnExit
                     >
-                      <Box margin={1}>
+                      <Box margin={1} sx={{ backgroundColor: "red" }}>
                         <Table size="small" aria-label="productos">
                           <TableHead>
                             <TableRow>

@@ -1,14 +1,16 @@
-// Ventas.js
 import React, { useContext, useState } from "react";
 import DashboardComponent from "../../components/DashboardComponent";
 import DrawerComponent from "../../components/DrawerComponent";
 import {
+  Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
+  CircularProgress,
+  Typography,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
@@ -18,9 +20,18 @@ import productosService from "../../async/services/get/productosService";
 import metodoVentasService from "../../async/services/get/metodoVentasService.js";
 import TableMetodoVentaComponent from "../../components/TableMetodoVentaComponent";
 import { useQuery } from "react-query";
-
+import ReportVentasComponent from "../../components/DashboardReporteComponent/ReportVentasComponent/index.jsx";
+import TableVentasReport from "../../components/DashboardReporteComponent/ReportVentasComponent/TableVentasReport/index.jsx";
+import ventasTodayService from "../../async/services/get/ventasTodayService.js";
+import empty from "../../assets/images/empty.svg";
 function Ventas() {
   const { data } = useContext(MainContext);
+  const {
+    data: reportVentas,
+    isLoading: isLoadingVentas,
+    isError: isErrorVentas,
+    refetch: refetchVentas,
+  } = useQuery("ventasToday", ventasTodayService);
   const { data: productos, isLoading: isLoadingProductos } = useQuery(
     "products",
     productosService
@@ -38,11 +49,11 @@ function Ventas() {
   const [openFormDialog, setOpenFormDialog] = useState(false);
 
   const handleButtonClick = () => {
-    // if (data?.caja?.fecha_cierre) {
-    //   setOpenDialog(true);
-    // } else {
-    navigate("/ventas/crear");
-    // }
+    if (data?.caja?.fecha_cierre) {
+      setOpenDialog(true);
+    } else {
+      navigate("/ventas/crear");
+    }
   };
 
   const handleCloseDialog = () => {
@@ -68,17 +79,8 @@ function Ventas() {
   return (
     <>
       <DrawerComponent>
-        <div style={{ display: "flex", flexDirection: "column", gap: 30 }}>
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleButtonClick}
-            >
-              Registrar Salida de almacen
-            </Button>
-          </div>
-          {/* <div
+        <Box style={{ display: "flex", flexDirection: "column", gap: 30 }}>
+          <Box
             style={{
               display: "flex",
               justifyContent: "center",
@@ -87,10 +89,104 @@ function Ventas() {
               gap: 30,
             }}
           >
+            <Typography
+              component={"h2"}
+              style={{
+                textAlign: "center",
+                fontSize: "2rem",
+                fontWeight: "bold  ",
+                marginTop: "2rem",
+              }}
+            >
+              Ventas
+            </Typography>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={handleButtonClick}
+            >
+              Crear Nueva Venta
+            </Button>
+            {/* Condición para mostrar un loading o el reporte de ventas */}
+            {isLoadingVentas ? (
+              <Box
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  width: "100%",
+                }}
+              >
+                <CircularProgress />
+              </Box>
+            ) : isErrorVentas ? (
+              <Box
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  width: "100%",
+                }}
+              >
+                <p>Error al cargar el reporte de ventas</p>
+              </Box>
+            ) : (
+              <>
+                <Typography
+                  component={"h2"}
+                  style={{
+                    textAlign: "center",
+                    fontSize: "1.5rem",
+                    fontWeight: "bold  ",
+                  }}
+                >
+                  Ventas de hoy
+                </Typography>
+                {reportVentas &&
+                Array.isArray(reportVentas) &&
+                reportVentas.length > 0 ? (
+                  <TableVentasReport
+                    reportData={reportVentas}
+                    ventaToday={true}
+                    refetchVentas={refetchVentas}
+                  />
+                ) : (
+                  <img
+                    src={empty}
+                    alt="No hay datos"
+                    style={{
+                      width: "10rem",
+                      height: "auto",
+                      display: "block",
+                      margin: "auto",
+                    }}
+                  />
+                )}
+              </>
+            )}
+          </Box>
+          <Box
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 30,
+            }}
+          >
+            <Typography
+              component={"h2"}
+              style={{
+                textAlign: "center",
+                fontSize: "1.5rem",
+                fontWeight: "bold  ",
+              }}
+            >
+              Presentaciones
+            </Typography>
             <TableMetodoVentaComponent
-              data={metodoVentasData || []} // Pasa los datos obtenidos a la tabla
-              products={productos || []} // Pasa la lista de productos
-              onProductSelect={handleProductSelect} // Pasa la función para manejar la selección de producto
+              data={metodoVentasData || []}
+              products={productos || []}
+              onProductSelect={handleProductSelect}
+              refetch={refetch}
             />
             <Button
               variant="contained"
@@ -100,8 +196,8 @@ function Ventas() {
             >
               Crear presentacion
             </Button>
-          </div> */}
-        </div>
+          </Box>
+        </Box>
       </DrawerComponent>
       <Dialog open={openDialog} onClose={handleCloseDialog}>
         <DialogTitle>Caja Cerrada</DialogTitle>
@@ -120,7 +216,7 @@ function Ventas() {
         </DialogActions>
       </Dialog>
 
-      {/* <Dialog open={openFormDialog} onClose={handleCloseForm}>
+      <Dialog open={openFormDialog} onClose={handleCloseForm}>
         <DialogTitle>Crear Método de Venta</DialogTitle>
         <DialogContent>
           <FormMetodoVentaComponent
@@ -130,7 +226,7 @@ function Ventas() {
             refetchMetodoVentas={refetch}
           />
         </DialogContent>
-      </Dialog> */}
+      </Dialog>
     </>
   );
 }

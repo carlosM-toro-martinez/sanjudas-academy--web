@@ -19,8 +19,8 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "center",
   },
   coverPhoto: {
-    width: "30rem",
-    height: "25rem",
+    width: "55rem",
+    height: "40rem",
     objectFit: "cover",
   },
   avatar: {

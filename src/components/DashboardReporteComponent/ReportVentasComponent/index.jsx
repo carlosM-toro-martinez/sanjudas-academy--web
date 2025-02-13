@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "react-query";
 import {
   MenuItem,
@@ -8,6 +8,7 @@ import {
   InputLabel,
   Typography,
   CircularProgress,
+  Box,
 } from "@mui/material";
 import DrawerComponent from "../../DrawerComponent";
 import ventasService from "../../../async/services/get/ventasService.js";
@@ -17,6 +18,7 @@ import TableVentasReport from "./TableVentasReport";
 function ReportVentasComponent() {
   const [idInicio, setIdInicio] = useState(null);
   const [idFinal, setIdFinal] = useState(null);
+  const [fechasAgrupadas, setFechasAgrupadas] = useState([]);
 
   const { data: ventas, isLoading: isLoadingVentas } = useQuery(
     "ventas",
@@ -50,10 +52,32 @@ function ReportVentasComponent() {
     }
   };
 
+  useEffect(() => {
+    if (ventas) {
+      const agrupadosPorFecha = ventas.reduce((acc, venta) => {
+        const fechaVenta = new Date(venta.fecha_venta).toLocaleDateString();
+        if (!acc[fechaVenta]) {
+          acc[fechaVenta] = {
+            fecha: fechaVenta,
+            primerosId: venta.id_venta,
+            ultimosId: venta.id_venta,
+          };
+        } else {
+          acc[fechaVenta].ultimosId = venta.id_venta;
+        }
+        return acc;
+      }, {});
+
+      const fechasTratadas = Object.values(agrupadosPorFecha);
+
+      setFechasAgrupadas(fechasTratadas);
+    }
+  }, [ventas]);
+
   return (
     <DrawerComponent>
       {!isLoadingVentas ? (
-        <div>
+        <Box>
           <Typography
             component={"h2"}
             style={{
@@ -65,65 +89,59 @@ function ReportVentasComponent() {
           >
             Reporte de ventas
           </Typography>
-          {!isLoadingVentas ? (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                gap: "5rem",
-                alignItems: "center",
-                marginTop: "3rem",
-              }}
-            >
-              <FormControl style={{ width: "15rem" }}>
-                <InputLabel id="select-inicio-label">
-                  Fecha de Inicio
-                </InputLabel>
-                <Select
-                  label="Fecha de Inicio"
-                  labelId="select-inicio-label"
-                  value={idInicio}
-                  onChange={handleInicioChange}
-                >
-                  {ventas?.map((venta) => (
-                    <MenuItem key={venta.id_venta} value={venta.id_venta}>
-                      {new Date(venta.fecha_venta).toLocaleDateString()}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleGenerateReport}
-                disabled={!idInicio || !idFinal}
+          <Box
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "5rem",
+              alignItems: "center",
+              marginTop: "3rem",
+            }}
+          >
+            <FormControl style={{ width: "15rem" }}>
+              <InputLabel id="select-inicio-label">Fecha de Inicio</InputLabel>
+              <Select
+                label="Fecha de Inicio"
+                labelId="select-inicio-label"
+                value={idInicio}
+                onChange={handleInicioChange}
               >
-                Generar Reporte
-              </Button>
+                {fechasAgrupadas?.map((fecha) => (
+                  <MenuItem key={fecha.fecha} value={fecha.primerosId}>
+                    {fecha.fecha}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-              <FormControl style={{ width: "15rem" }}>
-                <InputLabel id="select-final-label">Fecha Final</InputLabel>
-                <Select
-                  label="Fecha Final"
-                  labelId="select-final-label"
-                  value={idFinal}
-                  onChange={handleFinalChange}
-                >
-                  {ventas?.map((venta) => (
-                    <MenuItem key={venta.id_venta} value={venta.id_venta}>
-                      {new Date(venta.fecha_venta).toLocaleDateString()}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </div>
-          ) : (
-            <div>Cargando ventas...</div>
-          )}
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleGenerateReport}
+              disabled={!idInicio || !idFinal}
+            >
+              Generar Reporte
+            </Button>
+
+            <FormControl style={{ width: "15rem" }}>
+              <InputLabel id="select-final-label">Fecha Final</InputLabel>
+              <Select
+                label="Fecha Final"
+                labelId="select-final-label"
+                value={idFinal}
+                onChange={handleFinalChange}
+              >
+                {fechasAgrupadas?.map((fecha) => (
+                  <MenuItem key={fecha.fecha} value={fecha.ultimosId}>
+                    {fecha.fecha}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
 
           {isLoadingReport ? (
-            <div
+            <Box
               style={{
                 display: "flex",
                 justifyContent: "center",
@@ -131,13 +149,13 @@ function ReportVentasComponent() {
               }}
             >
               <CircularProgress />
-            </div>
+            </Box>
           ) : (
             reportData && <TableVentasReport reportData={reportData} />
           )}
-        </div>
+        </Box>
       ) : (
-        <div>Cargando ventas...</div>
+        <Box>Cargando ventas...</Box>
       )}
     </DrawerComponent>
   );

@@ -14,7 +14,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundAttachment: "fixed",
   },
   paper: {
-    marginTop: "2rem",
+    marginTop: "4rem",
     padding: theme.spacing(4),
     maxWidth: 400,
     width: "100%",

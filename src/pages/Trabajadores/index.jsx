@@ -1,6 +1,6 @@
 import React from "react";
 import DrawerComponent from "../../components/DrawerComponent";
-import { Button, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import TableTrabajadoresComponent from "../../components/TableTrabajadoresComponent";
@@ -12,7 +12,6 @@ function Trabajadores() {
   const { data, isLoading, error, refetch } = useQuery(`workers`, () =>
     trabajadoresService()
   );
-  console.log(data);
 
   const handleButtonClick = () => {
     navigate("/trabajadores/crear");
@@ -31,7 +30,7 @@ function Trabajadores() {
         >
           Trabajadores
         </Typography>
-        <div
+        <Box
           style={{
             display: "flex",
             flexDirection: "column",
@@ -42,7 +41,7 @@ function Trabajadores() {
           }}
         >
           {!isLoading && !error ? (
-            <TableTrabajadoresComponent trabajadores={data} />
+            <TableTrabajadoresComponent trabajadores={data} refetch={refetch} />
           ) : null}
           <Button
             variant="contained"
@@ -52,7 +51,7 @@ function Trabajadores() {
           >
             Crear
           </Button>
-        </div>
+        </Box>
       </DrawerComponent>
     </>
   );

@@ -59,6 +59,9 @@ const TableVentaComponent = ({
               Producto
             </TableCell>
             <TableCell sx={{ fontWeight: "bold", color: "#fff" }}>
+              Peso
+            </TableCell>
+            <TableCell sx={{ fontWeight: "bold", color: "#fff" }}>
               Cantidad
             </TableCell>
             <TableCell sx={{ fontWeight: "bold", color: "#fff" }}>
@@ -74,6 +77,7 @@ const TableVentaComponent = ({
           {productosSeleccionados.map((producto, index) => (
             <TableRow key={index}>
               <TableCell>{producto.nombre}</TableCell>
+              <TableCell>{producto.peso}</TableCell>
               <TableCell>{producto.cantidad}</TableCell>
               <TableCell>{producto.cantidad_unidad}</TableCell>
               <TableCell>

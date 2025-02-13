@@ -23,7 +23,7 @@ const useStyles = makeStyles(() => ({
   },
   drawerHeader: {
     padding: "0 8px",
-    minHeight: 80,
+    minHeight: 50,
   },
   aside: {
     backgroundColor: "white",

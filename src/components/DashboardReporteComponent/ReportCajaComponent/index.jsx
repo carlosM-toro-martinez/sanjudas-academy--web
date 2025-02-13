@@ -8,6 +8,7 @@ import {
   InputLabel,
   Typography,
   CircularProgress,
+  Box,
 } from "@mui/material";
 import DrawerComponent from "../../DrawerComponent";
 import cajaAllService from "../../../async/services/get/cajaAllService.js";
@@ -53,7 +54,7 @@ function ReportCajaComponent() {
   return (
     <DrawerComponent>
       {!isLoadingCajas ? (
-        <div>
+        <Box>
           <Typography
             component={"h2"}
             style={{
@@ -65,7 +66,7 @@ function ReportCajaComponent() {
           >
             Reporte de Cajas
           </Typography>
-          <div
+          <Box
             style={{
               display: "flex",
               justifyContent: "center",
@@ -114,10 +115,10 @@ function ReportCajaComponent() {
                 ))}
               </Select>
             </FormControl>
-          </div>
+          </Box>
 
           {isLoadingReport ? (
-            <div
+            <Box
               style={{
                 display: "flex",
                 justifyContent: "center",
@@ -125,13 +126,13 @@ function ReportCajaComponent() {
               }}
             >
               <CircularProgress />
-            </div>
+            </Box>
           ) : (
             reportData && <TableCajasReport reportData={reportData} />
           )}
-        </div>
+        </Box>
       ) : (
-        <div>Cargando cajas...</div>
+        <Box>Cargando cajas...</Box>
       )}
     </DrawerComponent>
   );

@@ -9,6 +9,10 @@ const useStyles = makeStyles((theme) => ({
   collapseContainer: {
     padding: theme.spacing(2),
   },
+
+  tableHeader: {
+    backgroundColor: "#3d97ef",
+  },
 }));
 
 export default useStyles;

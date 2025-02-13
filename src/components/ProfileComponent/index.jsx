@@ -10,9 +10,9 @@ const ProfileComponent = () => {
 
   return (
     <Paper elevation={3} className={classes.root}>
-      <div className={classes.coverPhotoContainer}>
+      <Box className={classes.coverPhotoContainer}>
         <img src={background} alt="Cover" className={classes.coverPhoto} />
-      </div>
+      </Box>
 
       <Box className={classes.profileInfo}>
         <Typography variant="h4" className={classes.name}>

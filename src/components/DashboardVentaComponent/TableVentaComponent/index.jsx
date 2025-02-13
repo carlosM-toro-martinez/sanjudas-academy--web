@@ -19,11 +19,28 @@ const TableVentaComponent = ({
 }) => {
   const classes = useStyles();
   const calcularSumaTotal = () =>
-    productosSeleccionados.reduce(
-      (total, producto) =>
-        total + parseFloat(producto.precio) * parseInt(producto.cantidad),
-      0
-    );
+    productosSeleccionados.reduce((total, producto) => {
+      if (producto.cantidad && !producto.cantidad_unidad && !producto.peso) {
+        return (
+          total + parseFloat(producto.precio) * parseFloat(producto.cantidad)
+        );
+      }
+      if (!producto.cantidad && producto.cantidad_unidad && !producto.peso) {
+        return (
+          total +
+          parseFloat(producto.precio) * parseFloat(producto.cantidad_unidad)
+        );
+      }
+      if (producto.cantidad && producto.cantidad_unidad && !producto.peso) {
+        return (
+          total +
+          parseFloat(producto.precio) * parseFloat(producto.cantidad_unidad)
+        );
+      }
+      if (!producto.cantidad && !producto.cantidad_unidad && producto.peso) {
+        return total + parseFloat(producto.precio) * parseFloat(producto.peso);
+      }
+    }, 0);
 
   useEffect(() => {
     const total = calcularSumaTotal();
@@ -34,11 +51,16 @@ const TableVentaComponent = ({
     <TableContainer component={Paper}>
       <Table>
         <TableHead>
-          {/* <TableRow>
+          <TableRow>
             <TableCell
-              sx={{ fontWeight: "bold", color: "#000", fontSize: "1.2rem" }}
+              sx={{
+                fontWeight: "bold",
+                color: "#000",
+                fontSize: "1.2rem",
+                textTransform: "capitalize",
+              }}
               align="center"
-              colSpan={1}
+              colSpan={2}
             >
               Cliente: {productosSeleccionados[0]?.clienteNombre}
             </TableCell>
@@ -50,7 +72,7 @@ const TableVentaComponent = ({
             >
               Puntos de fidelidad: {productosSeleccionados[0]?.clientePuntos}
             </TableCell>
-          </TableRow> */}
+          </TableRow>
           <TableRow
             className={classes.tableHeader}
             sx={{ backgroundColor: "#3d97ef" }}
@@ -58,12 +80,12 @@ const TableVentaComponent = ({
             <TableCell sx={{ fontWeight: "bold", color: "#fff" }}>
               Producto
             </TableCell>
-            {/* <TableCell sx={{ fontWeight: "bold", color: "#fff" }}>
+            <TableCell sx={{ fontWeight: "bold", color: "#fff" }}>
               Precio
-            </TableCell> */}
-            {/* <TableCell sx={{ fontWeight: "bold", color: "#fff" }}>
+            </TableCell>
+            <TableCell sx={{ fontWeight: "bold", color: "#fff" }}>
               Peso
-            </TableCell> */}
+            </TableCell>
             <TableCell sx={{ fontWeight: "bold", color: "#fff" }}>
               Cantidad
             </TableCell>
@@ -80,8 +102,8 @@ const TableVentaComponent = ({
           {productosSeleccionados.map((producto, index) => (
             <TableRow key={index}>
               <TableCell>{producto.nombre}</TableCell>
-              {/* <TableCell>{producto.precio} Bs</TableCell> */}
-              {/* <TableCell>{producto.peso}</TableCell> */}
+              <TableCell>{producto.precio} Bs</TableCell>
+              <TableCell>{producto.peso} Kg</TableCell>
               <TableCell>{producto.cantidad}</TableCell>
               <TableCell>{producto.cantidad_unidad}</TableCell>
               <TableCell>
@@ -91,14 +113,14 @@ const TableVentaComponent = ({
               </TableCell>
             </TableRow>
           ))}
-          {/* <TableRow>
+          <TableRow>
             <TableCell sx={{ fontWeight: "bold" }} colSpan={1}>
               Total
             </TableCell>
             <TableCell sx={{ fontWeight: "bold" }} colSpan={3}>
               {calcularSumaTotal()} Bs
             </TableCell>
-          </TableRow> */}
+          </TableRow>
         </TableBody>
       </Table>
     </TableContainer>

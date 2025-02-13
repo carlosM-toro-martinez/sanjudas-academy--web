@@ -14,11 +14,15 @@ import MenuItem from "@mui/material/MenuItem";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import TextField from "@mui/material/TextField";
 import EnhancedTableHead from "./EnhancedTableHead";
 import ModalUpdateProduct from "./ModalUpdateProduct";
 import ModalViewProduct from "./ModalViewProduct";
 import useStyles from "./table.styles";
 import productoDeleteServices from "../../async/services/delete/productoDeleteServices";
+import { useMutation } from "react-query";
+import detalleCompraUpdateServices from "../../async/services/put/detalleCompraUpdateServices";
+import detalleCompraDeleteServices from "../../async/services/delete/detalleCompraDeleteServices";
 
 const ITEM_HEIGHT = 48;
 
@@ -26,6 +30,7 @@ export default function TableProductsComponent({ productos, refetchProducts }) {
   const classes = useStyles();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [searchQuery, setSearchQuery] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -33,6 +38,8 @@ export default function TableProductsComponent({ productos, refetchProducts }) {
   const [openViewModal, setOpenViewModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedidProducto, setSelectedIdProduct] = useState(null);
+  const [editingRow, setEditingRow] = useState(null);
+  const [editedPrice, setEditedPrice] = useState("");
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -51,7 +58,17 @@ export default function TableProductsComponent({ productos, refetchProducts }) {
     setPage(0);
   };
 
-  const visibleRows = productos.slice(
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+    setPage(0); // Reinicia la paginación al cambiar la búsqueda
+  };
+
+  // Filtrar productos según el texto de búsqueda
+  const filteredProducts = productos.filter((producto) =>
+    producto.nombre?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const visibleRows = filteredProducts.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   );
@@ -77,16 +94,62 @@ export default function TableProductsComponent({ productos, refetchProducts }) {
     handleCloseMenu();
   };
 
+  const { mutate } = useMutation(
+    ({ id, updatedPrice }) =>
+      detalleCompraUpdateServices(id, { precio_unitario: updatedPrice }),
+    {
+      onSuccess: () => {
+        handleCloseModals();
+        console.log("Detalle de compra actualizado exitosamente");
+      },
+      onError: (error) => {
+        console.error(
+          "Error al actualizar el detalle de compra:",
+          error.message
+        );
+      },
+    }
+  );
+
+  const {
+    mutate: mutateDelete,
+    isLoading: loading,
+    isError,
+  } = useMutation(
+    async ({ dataDelete, idDetalle }) => {
+      return await detalleCompraDeleteServices(idDetalle, dataDelete);
+    },
+    {
+      onSuccess: (response) => {
+        console.log("Mutación exitosa:", response);
+        refetchProducts();
+        handleCloseModals();
+      },
+      onError: (error) => {
+        console.error("Error en la mutación:", error);
+      },
+    }
+  );
+
   return (
     <Box className={classes.root}>
       <Paper className={classes.paper}>
+        {/* Campo de búsqueda */}
+        <Box sx={{ padding: 2 }}>
+          <TextField
+            label="Buscar producto"
+            variant="outlined"
+            fullWidth
+            value={searchQuery}
+            onChange={handleSearchChange}
+          />
+        </Box>
         <TableContainer>
           <Table aria-labelledby="tableTitle" size="medium">
             <EnhancedTableHead />
             <TableBody>
               {visibleRows.map((row, index) => {
                 const isEvenRow = index % 2 === 0;
-                console.log(row);
 
                 return (
                   <TableRow
@@ -105,13 +168,44 @@ export default function TableProductsComponent({ productos, refetchProducts }) {
                     <TableCell align="left">
                       {row.codigo_barra || "N/A"}
                     </TableCell>
-                    <TableCell sx={{ color: row.stock > 0 ? "green" : "red" }}>
-                      {row.stock !== null ? row.stock : "N/A"}
+                    <TableCell
+                      sx={{
+                        color:
+                          row.stock > 0 && row.subCantidad === 0
+                            ? "green"
+                            : row.stock > 0
+                            ? "green"
+                            : "red",
+                      }}
+                    >
+                      {row.stock > 0 && row.subCantidad === 0
+                        ? row.subCantidad
+                        : row.stock !== null
+                        ? row.stock
+                        : "N/A"}
                     </TableCell>
                     <TableCell
-                      sx={{ color: row.subCantidad > 0 ? "green" : "red" }}
+                      sx={{
+                        color:
+                          row.stock > 0 && row.subCantidad === 0
+                            ? "green"
+                            : row.subCantidad > 0
+                            ? "green"
+                            : "red",
+                      }}
                     >
-                      {row.subCantidad !== null ? row.subCantidad : "N/A"}
+                      {row.stock > 0 && row.subCantidad === 0
+                        ? row.stock
+                        : row.subCantidad !== null
+                        ? row.subCantidad
+                        : "N/A"}
+                    </TableCell>
+
+                    <TableCell sx={{ color: row.peso > 0 ? "green" : "red" }}>
+                      {row.peso !== null ? row.peso : "N/A"}
+                    </TableCell>
+                    <TableCell sx={{ color: "green", fontWeight: "bold" }}>
+                      {row.precio !== null ? `${row.precio} Bs` : "N/A"}
                     </TableCell>
                     <TableCell>
                       <IconButton
@@ -153,7 +247,7 @@ export default function TableProductsComponent({ productos, refetchProducts }) {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={productos.length}
+          count={filteredProducts.length} // Cambiar a los productos filtrados
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
@@ -173,6 +267,12 @@ export default function TableProductsComponent({ productos, refetchProducts }) {
         <ModalViewProduct
           product={selectedProduct}
           handleClose={handleCloseModals}
+          editingRow={editingRow}
+          setEditingRow={setEditingRow}
+          editedPrice={editedPrice}
+          setEditedPrice={setEditedPrice}
+          mutate={mutate}
+          mutateDelete={mutateDelete}
         />
       )}
     </Box>
@@ -182,10 +282,3 @@ export default function TableProductsComponent({ productos, refetchProducts }) {
 TableProductsComponent.propTypes = {
   productos: PropTypes.array.isRequired,
 };
-
-{
-  /* <FormControlLabel
-        control={<Switch checked={dense} onChange={handleChangeDense} />}
-        label="acortar"
-      /> */
-}

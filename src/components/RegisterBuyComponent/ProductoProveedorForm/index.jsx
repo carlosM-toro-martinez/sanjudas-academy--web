@@ -23,6 +23,8 @@ const ProductoProveedorForm = ({
   handleOpenProveedorModal,
   isLoteProveedorLocked,
   setError,
+  setProductoName,
+  setProveedorName
 }) => {
   const [errors, setErrors] = useState({
     proveedor: false,
@@ -85,7 +87,9 @@ const ProductoProveedorForm = ({
             }
             onChange={(event, newValue) => {
               if (newValue) {
+                console.log(newValue);
                 setProducto(newValue.id_producto);
+                setProductoName(newValue.nombre)
               }
             }}
             renderInput={(params) => (
@@ -146,7 +150,11 @@ const ProductoProveedorForm = ({
             label="proveedor"
             id="demo-simple-select"
             value={proveedor}
-            onChange={(e) => setProveedor(e.target.value)}
+            onChange={(e, newValue) => {
+              setProveedor(e.target.value);
+              setProveedorName(newValue.props.children);
+              
+            }}
             disabled={isLoteProveedorLocked}
           >
             {proveedores.map((proveedor) => (

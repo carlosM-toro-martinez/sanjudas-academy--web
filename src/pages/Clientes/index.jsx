@@ -1,6 +1,6 @@
 import React from "react";
 import DrawerComponent from "../../components/DrawerComponent";
-import { Button, Paper, Typography } from "@mui/material";
+import { Box, Button, Paper, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "react-query";
 import clientesService from "../../async/services/get/clientesService";
@@ -61,7 +61,7 @@ function Clientes() {
   if (clientsData) {
     return (
       <DrawerComponent>
-        <div
+        <Box
           style={{
             textAlign: "center",
             fontSize: "2rem",
@@ -70,7 +70,7 @@ function Clientes() {
           }}
         >
           Clientes
-        </div>
+        </Box>
         <DashboardClientesComponent
           clients={clientsData}
           refetchClients={refetchClients}

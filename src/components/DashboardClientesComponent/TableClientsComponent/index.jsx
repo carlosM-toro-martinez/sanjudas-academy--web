@@ -13,6 +13,7 @@ import {
   TablePagination,
   Snackbar,
   Alert,
+  TextField,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import useStyles from "./tableClients.styles";
@@ -33,6 +34,7 @@ function TableClientsComponent({
   const [selectedClient, setSelectedClient] = useState(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [searchText, setSearchText] = useState(""); // Estado para el texto de búsqueda
 
   const queryClient = useQueryClient();
 
@@ -83,13 +85,37 @@ function TableClientsComponent({
     setSnackbarOpen(false);
   };
 
-  const paginatedClients = clients.slice(
+  const handleSearchChange = (event) => {
+    console.log(event?.target?.value);
+
+    setSearchText(event?.target?.value);
+  };
+
+  const filteredClients = clients.filter((client) => {
+    const search = searchText?.toLowerCase();
+    return (
+      client.nombre?.toLowerCase().includes(search) ||
+      client.apellido?.toLowerCase().includes(search) ||
+      client.codigo?.toLowerCase().includes(search)
+    );
+  });
+
+  const paginatedClients = filteredClients.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   );
 
   return (
     <Paper className={classes.tableContainer}>
+      <TextField
+        label="Buscar cliente"
+        variant="outlined"
+        fullWidth
+        margin="normal"
+        value={searchText}
+        onChange={handleSearchChange}
+      />
+
       <TableContainer>
         <Table className={classes.table}>
           <TableHead className={classes.tableHeader}>
@@ -191,7 +217,7 @@ function TableClientsComponent({
       <TablePagination
         rowsPerPageOptions={[5, 10, 25]}
         component="div"
-        count={clients.length}
+        count={filteredClients.length} // Usar clientes filtrados
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}

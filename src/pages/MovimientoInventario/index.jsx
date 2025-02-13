@@ -1,21 +1,12 @@
-import React, { useContext } from "react";
+// Ventas.js
+import React, { useContext, useState } from "react";
 import DrawerComponent from "../../components/DrawerComponent";
 import { Box, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import { MainContext } from "../../context/MainContext";
-import movimientoInventariosService from "../../async/services/get/movimientoInventariosService";
-import { useQuery } from "react-query";
-import TableInventarioComponent from "../../components/TableInventarioComponent";
 
 function MovimientoInventario() {
-  const {
-    data: movimientos,
-    isLoading: isLoadingMovimientos,
-    error: errorMovimientos,
-    refetch: refetchMovimientos,
-  } = useQuery("movimientos-inventario", movimientoInventariosService);
-  console.log(movimientos);
   const { data } = useContext(MainContext);
   const navigate = useNavigate();
 
@@ -35,17 +26,6 @@ function MovimientoInventario() {
             >
               Realizar Movimiento
             </Button>
-          </Box>
-          <Box
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            {movimientos && !errorMovimientos && (
-              <TableInventarioComponent movimientos={movimientos} />
-            )}
           </Box>
         </Box>
       </DrawerComponent>

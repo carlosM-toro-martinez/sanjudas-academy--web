@@ -12,6 +12,9 @@ import {
   Typography,
 } from "@mui/material";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import ProductSelectedComponent from "./ProductSelectedComponent";
+import ClienteAutocompleteComponent from "./ClienteAutocompleteComponent";
+import ProductoAutocompleteComponent from "./ProductoAutocompleteComponent";
 
 const VentaForm = ({
   ventaData,
@@ -31,6 +34,14 @@ const VentaForm = ({
   setCantLimit,
   cantUnitLimit,
   setCantUnitLimit,
+  pesoLimit,
+  setPesoLimit,
+  removeProducto,
+  setTotalPrice,
+  productosDetallados,
+  setProductosDetallados,
+  metodoPago,
+  setMetodoPago,
 }) => {
   const [lotesProducto, setLotesProducto] = useState([]);
   const [peso, setPeso] = useState("");
@@ -39,6 +50,9 @@ const VentaForm = ({
   const [cantidadPorUnidad, setCantidadPorUnidad] = useState("");
   const [cantidad, setCantidad] = useState("");
   const [cantidadPorCaja, setCantidadPorCaja] = useState("");
+  const [metodosVenta, setMetodosVenta] = useState(null);
+  const [metodoSeleccionado, setMetodoSeleccionado] = useState(null);
+  const [cantidadMetodo, setcantidadMetodo] = useState(null);
 
   useEffect(() => {
     const clienteDefecto = clientes.find((cliente) => cliente.id_cliente === 1);
@@ -48,21 +62,25 @@ const VentaForm = ({
   }, [clientes]);
 
   const handleProductoChange = (productoId, newValue) => {
+    setMetodosVenta(newValue?.inventarios[0].lote?.producto?.metodosVenta);
+
     setProducto(productoId);
 
     const lotesFiltrados =
       productos
         .find((producto) => producto.id_producto === productoId)
-        ?.inventarios.filter((inv) => inv.lote.cantidad > 1)
+        ?.inventarios.filter((inv) => inv.cantidad >= 1 || inv.peso > 0)
         .map((inv) => inv) || [];
 
     setLotesProducto(lotesFiltrados);
     setCantLimit(lotesFiltrados[0]?.lote?.producto?.stock);
     setCantUnitLimit(lotesFiltrados[0]?.lote?.producto?.subCantidad);
+    setPesoLimit(lotesFiltrados[0]?.lote?.producto?.peso === "NaN" || !lotesFiltrados[0]?.lote?.producto?.peso ? 0 : lotesFiltrados[0]?.lote?.producto?.peso );
+
     setCantidadPorCaja(
       lotesFiltrados[0]?.lote?.cantidadPorCaja
         ? lotesFiltrados[0]?.lote?.cantidadPorCaja
-        : 10
+        : null
     );
 
     if (lotesFiltrados.length > 0) {
@@ -72,6 +90,47 @@ const VentaForm = ({
         return currentDate < prevDate ? current : prev;
       });
 
+      setProductosDetallados((prev) => [
+        {
+          productoId,
+          newValue,
+          lotesFiltrados,
+          cantLimit: lotesFiltrados[0]?.lote?.producto?.stock,
+          cantUnitLimit: lotesFiltrados[0]?.lote?.producto?.subCantidad,
+          pesoLimit: lotesFiltrados[0]?.lote?.producto?.peso === "NaN" || !lotesFiltrados[0]?.lote?.producto?.peso ? 0 : lotesFiltrados[0]?.lote?.producto?.peso,
+          cantidadPorCaja: lotesFiltrados[0]?.lote?.cantidadPorCaja || null,
+          loteMasAntiguo: loteMasAntiguo,
+          peso: lotesFiltrados[0]?.lote?.producto?.peso > 0 ? 1 : null,
+          cantidad:
+            lotesFiltrados[0]?.lote?.producto?.stock > 0 &&
+            lotesFiltrados[0]?.lote?.producto?.subCantidad === 0
+              ? 1
+              : null,
+          cantidadPorUnidad:
+            lotesFiltrados[0]?.lote?.producto?.subCantidad > 0 &&
+            lotesFiltrados[0]?.lote?.producto?.peso <= 0 || lotesFiltrados[0]?.lote?.producto?.peso === "NaN"
+              ? 1
+              : null,
+          ventaData,
+          metodosVenta: newValue?.inventarios[0].lote?.producto?.metodosVenta,
+          cantidadMetodo:
+            Array.isArray(
+              newValue?.inventarios[0].lote?.producto?.metodosVenta
+            ) &&
+            newValue?.inventarios[0].lote?.producto?.metodosVenta.length > 0
+              ? 1
+              : null,
+          pesoMetodo:
+            Array.isArray(
+              newValue?.inventarios[0].lote?.producto?.metodosVenta
+                ?.peso_por_metodo
+            ) &&
+            newValue?.inventarios[0].lote?.producto?.metodosVenta.length > 0
+              ? 1
+              : null,
+        },
+        ...prev,
+      ]);
       handleLoteChange(loteMasAntiguo?.lote?.id_lote, lotesFiltrados);
       setCantLote(loteMasAntiguo);
     }
@@ -86,74 +145,13 @@ const VentaForm = ({
 
     setCantLote(loteSeleccionado);
     setVentaData((prev) => ({ ...prev, loteId }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const productoSeleccionado = productos.find(
-      (producto) => producto.id_producto === ventaData.productoId
+    setProductosDetallados((prev) =>
+      prev.map((producto) =>
+        producto.lotesFiltrados.some((lote) => lote.lote.id_lote === loteId)
+          ? { ...producto, loteSeleccionado }
+          : producto
+      )
     );
-    const clienteSeleccionado = clientes.find(
-      (cliente) => cliente.id_cliente === ventaData.clienteId
-    );
-
-    let cajasRestantes = 0;
-    if (cantidadPorUnidad) {
-      cajasRestantes = Math.floor(cantidadPorUnidad / cantidadPorCaja);
-      setCantidad(cajasRestantes);
-    } else {
-      cajasRestantes = cantidad;
-    }
-
-    if (productoSeleccionado && clienteSeleccionado) {
-      const lotesOrdenados = lotesProducto.sort(
-        (a, b) => a.lote.id_lote - b.lote.id_lote
-      );
-
-      let cantidadRestante = cantidadPorUnidad;
-      for (let i = 0; i < lotesOrdenados.length; i++) {
-        let loteData = lotesOrdenados[i];
-        console.log(loteData.lote.id_lote);
-
-        if (cantidadRestante >= loteData.subCantidad) {
-          cantidadRestante -= loteData.subCantidad;
-          addProducto(
-            productoSeleccionado,
-            clienteSeleccionado,
-            loteData.lote.id_lote,
-            peso,
-            precio,
-            loteData.subCantidad,
-            cajasRestantes
-          );
-        } else {
-          addProducto(
-            productoSeleccionado,
-            clienteSeleccionado,
-            loteData.lote.id_lote,
-            peso,
-            precio,
-            cantidadRestante,
-            cajasRestantes
-          );
-          break;
-        }
-      }
-
-      setVentaData((prev) => ({
-        ...prev,
-        productoId: "",
-        loteId: "",
-      }));
-      setLote("");
-      setLotesProducto([]);
-      setPeso("");
-      setPrecio("");
-      setCantidadPorUnidad("");
-      setCantidad("");
-      setCantLimit(0);
-      setCantUnitLimit(0);
-    }
   };
 
   const handleCancelar = () => {
@@ -171,97 +169,33 @@ const VentaForm = ({
     setCantidad("");
     setCantLimit(0);
     setCantUnitLimit(0);
+    setPesoLimit(0);
+    setMetodosVenta(null);
+    setcantidadMetodo(null);
+    setMetodoSeleccionado(null);
+    setProductosDetallados([]);
   };
 
   useEffect(() => {
     setCancelForm(() => handleCancelar);
   }, [setCancelForm]);
 
-  const productosUnicos = [
+  const 
+  productosUnicos = [
     ...new Map(
       productos.map((producto) => [producto.id_producto, producto])
     ).values(),
   ];
 
+  const productosUnicosFiltrados = productosUnicos.filter(
+    (producto) => producto.inventarios.length > 0
+  );
+  
+
   return (
     <Box sx={{ padding: 2 }}>
-      <form onSubmit={handleSubmit}>
-        <Grid container spacing={2}>
-          {/* Campos para cliente y producto */}
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
-              <Autocomplete
-                options={clientes || []}
-                getOptionLabel={(cliente) => cliente?.nombre || ""}
-                value={
-                  clientes.find(
-                    (cliente) => cliente.id_cliente === ventaData.clienteId
-                  ) || null
-                }
-                onChange={(event, newValue) => {
-                  if (newValue) {
-                    setCliente(newValue.id_cliente);
-                  }
-                }}
-                isOptionEqualToValue={(option, value) =>
-                  option.id_cliente === value.id_cliente
-                }
-                disabled={productosSeleccionados?.length > 0}
-                renderInput={(params) => (
-                  <TextField {...params} label="Destinatario" required />
-                )}
-              />
-              <Button
-                onClick={handleOpenClientModal}
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  width: "100%",
-                  marginTop: "8px",
-                }}
-              >
-                <AddCircleOutlineIcon color="error" />
-              </Button>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
-              <Autocomplete
-                options={productosUnicos || []}
-                getOptionLabel={(producto) => producto.nombre || ""}
-                value={
-                  productosUnicos.find(
-                    (producto) => producto.id_producto === ventaData.productoId
-                  ) || null
-                }
-                onChange={(event, newValue) => {
-                  if (newValue) {
-                    handleProductoChange(newValue.id_producto, newValue);
-                    setCantidad();
-                    setCantidadPorUnidad();
-                  }
-                }}
-                isOptionEqualToValue={(option, value) =>
-                  option.id_producto === value.id_producto
-                }
-                filterOptions={(options, { inputValue }) => {
-                  return options.filter(
-                    (option) =>
-                      option.nombre
-                        .toLowerCase()
-                        .includes(inputValue.toLowerCase()) ||
-                      option.codigo_barra
-                        ?.toLowerCase()
-                        .includes(inputValue.toLowerCase())
-                  );
-                }}
-                renderInput={(params) => (
-                  <TextField {...params} label="Producto" />
-                )}
-              />
-            </FormControl>
-          </Grid>
-
+      <form>
+        <Grid container spacing={1} justifyContent="center">
           {lotesProducto.length > 0 && (
             <Grid item xs={12} sm={12} sx={{ display: "none" }}>
               <FormControl fullWidth>
@@ -286,82 +220,26 @@ const VentaForm = ({
             </Grid>
           )}
 
-          {cantUnitLimit !== 0 && (
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Cantidad por unidad"
-                type="number"
-                value={cantidadPorUnidad}
-                onChange={(e) =>
-                  setCantidadPorUnidad(Math.min(e.target.value, cantUnitLimit))
-                }
-                inputProps={{
-                  max: cantUnitLimit,
-                }}
-                fullWidth
-              />
-              <Typography variant="caption" color="textSecondary">
-                Límite máximo: {cantUnitLimit}
-              </Typography>
-            </Grid>
-          )}
-
-          {cantUnitLimit === 0 && cantLimit > 0 && (
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Cantidad"
-                type="number"
-                value={cantidad}
-                onChange={(e) =>
-                  setCantidad(Math.min(e.target.value, cantLimit))
-                }
-                inputProps={{
-                  max: cantLimit,
-                }}
-                fullWidth
-              />
-              <Typography variant="caption" color="textSecondary">
-                Límite máximo: {cantLimit}
-              </Typography>
-            </Grid>
-          )}
-
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              width: "100%",
-              gap: "2rem",
-              marginTop: "2rem",
-            }}
-          >
-            <Button
-              variant="contained"
-              style={{
-                backgroundColor: "red",
-                color: "#fff",
-                fontWeight: "bold",
-              }}
-              fullWidth
-              onClick={handleCancelar}
-            >
-              Cancelar
-            </Button>
-            <Button
-              variant="contained"
-              style={{
-                backgroundColor: "#3d97ef",
-                color: "#fff",
-                fontWeight: "bold",
-              }}
-              fullWidth
-              type="submit"
-            >
-              Añadir
-            </Button>
-          </div>
         </Grid>
       </form>
+      <ProductSelectedComponent
+        productosSeleccionados={productosSeleccionados}
+        removeProducto={removeProducto}
+        setTotalPrice={setTotalPrice}
+        productosDetallados={productosDetallados}
+        setProductosDetallados={setProductosDetallados}
+        handleCancelar={handleCancelar}
+        clientes={clientes}
+        ventaData={ventaData}
+        setCliente={setCliente}
+        handleOpenClientModal={handleOpenClientModal}
+        productosUnicosFiltrados={productosUnicosFiltrados}
+        handleProductoChange={handleProductoChange}
+        setCantidad={setCantidad}
+        setCantidadPorUnidad={setCantidadPorUnidad}
+        metodoPago={metodoPago}
+        setMetodoPago={setMetodoPago}
+      />
     </Box>
   );
 };

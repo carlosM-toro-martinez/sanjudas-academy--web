@@ -44,7 +44,7 @@ const SalidaForm = ({
   const [metodosVenta, setMetodosVenta] = useState(null);
   const [metodoSeleccionado, setMetodoSeleccionado] = useState(null);
   const [cantidadMetodo, setcantidadMetodo] = useState(null);
-  const [tipo_movimiento, setTipo_movimiento] = useState("");
+
   useEffect(() => {
     const clienteDefecto = clientes.find((cliente) => cliente.id_cliente === 1);
     if (clienteDefecto) {
@@ -155,8 +155,7 @@ const SalidaForm = ({
                 peso,
                 0,
                 loteData.subCantidad,
-                loteData.cantidad,
-                tipo_movimiento
+                loteData.cantidad
               );
             }
           } else {
@@ -171,8 +170,7 @@ const SalidaForm = ({
               peso,
               0,
               unidadesRestantes,
-              cajasRestantes,
-              tipo_movimiento
+              cajasRestantes
             );
             break;
           }
@@ -193,8 +191,7 @@ const SalidaForm = ({
                   peso,
                   0,
                   loteData.subCantidad,
-                  loteData.cantidad,
-                  tipo_movimiento
+                  loteData.cantidad
                 );
               } else {
                 if (cantidadRestante === 0) {
@@ -208,8 +205,7 @@ const SalidaForm = ({
                   peso,
                   0,
                   cantidadRestante,
-                  cajasRestantes,
-                  tipo_movimiento
+                  cajasRestantes
                 );
                 break;
               }
@@ -229,8 +225,7 @@ const SalidaForm = ({
                   loteData.peso,
                   0,
                   0,
-                  0,
-                  tipo_movimiento
+                  0
                 );
               } else {
                 if (pesoRestante === 0) {
@@ -243,8 +238,7 @@ const SalidaForm = ({
                   pesoRestante,
                   0,
                   0,
-                  0,
-                  tipo_movimiento
+                  0
                 );
                 break;
               }
@@ -263,8 +257,7 @@ const SalidaForm = ({
                   peso,
                   0,
                   0,
-                  loteData.cantidad,
-                  tipo_movimiento
+                  loteData.cantidad
                 );
               } else {
                 if (cantidadPorMenor === 0) {
@@ -277,8 +270,7 @@ const SalidaForm = ({
                   peso,
                   0,
                   0,
-                  cantidadPorMenor,
-                  tipo_movimiento
+                  cantidadPorMenor
                 );
                 break;
               }
@@ -349,15 +341,11 @@ const SalidaForm = ({
     setMetodoSeleccionado(event.target.value);
   };
 
-  const handleChange = (event) => {
-    setTipo_movimiento(event.target.value);
-  };
-
   return (
     <Box sx={{ padding: 2 }}>
       <form onSubmit={handleSubmit}>
         <Grid container spacing={1} justifyContent="center">
-          <Grid item xs={12} sm={6} sx={{ display: "none" }}>
+          <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
               <Autocomplete
                 options={clientes || []}
@@ -592,15 +580,6 @@ const SalidaForm = ({
               </Grid>
             </Box>
           ) : null}
-
-          <TextField
-            label="Descripción"
-            variant="outlined"
-            fullWidth
-            value={tipo_movimiento}
-            onChange={handleChange}
-            sx={{ marginTop: "1rem" }}
-          />
           <Box
             style={{
               display: "flex",

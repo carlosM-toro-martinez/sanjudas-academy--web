@@ -4,6 +4,10 @@ import {
   TextField,
   Box,
   Paper,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
   IconButton,
   Snackbar,
   InputAdornment,
@@ -82,8 +86,15 @@ function LoginAdministradorComponent() {
 
   return (
     <Box className={classes.root}>
+      {/* <Typography
+        variant="h1"
+        style={{ fontSize: "5rem", color: "white", fontWeight: "bold" }}
+      >
+        Name App
+      </Typography> */}
       <Paper className={classes.paper} elevation={10}>
         <Box className={classes.titleContainer}>
+          <img src={conver} alt="" style={{ width: "15rem" }} />
           <Typography
             component={"h2"}
             style={{
@@ -94,7 +105,6 @@ function LoginAdministradorComponent() {
           >
             Iniciar Sesion
           </Typography>
-          <img src={conver} alt="" style={{ width: "10rem" }} />
         </Box>
         <Box component="form" className={classes.form} onSubmit={handleSubmit}>
           <TextField

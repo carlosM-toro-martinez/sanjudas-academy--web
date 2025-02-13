@@ -51,8 +51,7 @@ function DashboardSalidaComponent({
     peso,
     price,
     cantidadPorUnidad,
-    cantidad,
-    tipo_movimiento
+    cantidad
   ) => {
     setProductosSeleccionados((prev) => {
       return [
@@ -68,7 +67,6 @@ function DashboardSalidaComponent({
           cantidad_unidad: cantidadPorUnidad ? cantidadPorUnidad : 0,
           cantidad: cantidad ? cantidad : 0,
           id_trabajador: user?.id_trabajador,
-          tipo_movimiento: tipo_movimiento,
         },
       ];
     });

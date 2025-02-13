@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { Box, IconButton, Menu, MenuItem } from "@mui/material";
+import { Box, IconButton, Menu, MenuItem, Typography } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -7,7 +7,7 @@ import BreadcrumbsComponent from "./BreadcrumbsComponent";
 import { MainContext } from "../../../context/MainContext";
 import { useNavigate } from "react-router-dom";
 
-function NavBarComponent({ handleDrawerOpen, open }) {
+function NavBarComponent({ handleDrawerOpen, open, user }) {
   const { setToken, setUser, setSuperAdmin } = useContext(MainContext);
   const [anchorEl, setAnchorEl] = useState(null);
   const openMenu = Boolean(anchorEl);
@@ -54,7 +54,14 @@ function NavBarComponent({ handleDrawerOpen, open }) {
       >
         {open ? <MenuOpenIcon /> : <MenuIcon />}
       </IconButton>
-      <BreadcrumbsComponent />
+      <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center'}} >
+        {user ? 
+          <Typography variant="h4" sx={{ textTransform: 'capitalize' }}>
+            {user.nombre} {user.apellido_paterno} {user.apellido_materno}
+          </Typography>
+        : null}
+        <BreadcrumbsComponent />
+      </Box>
       <IconButton
         color="inherit"
         aria-label="account options"

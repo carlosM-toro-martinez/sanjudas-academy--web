@@ -7,9 +7,8 @@ import DashboardInicioComponent from "../../components/DashboardInicioComponent"
 
 function Inicio() {
   return (
-    <>
-      <DrawerComponent>
-        {/* <Typography
+    <DrawerComponent>
+      {/* <Typography
           component={"h2"}
           style={{
             textAlign: "center",
@@ -20,9 +19,8 @@ function Inicio() {
         >
           Inicio
         </Typography> */}
-        <DashboardInicioComponent />
-      </DrawerComponent>
-    </>
+      <DashboardInicioComponent />
+    </DrawerComponent>
   );
 }
 

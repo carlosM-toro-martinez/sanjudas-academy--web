@@ -12,7 +12,7 @@ import FormCliente from "../../FormClientComponent";
 function ClientModal({ open, handleClose, refetchClients }) {
   return (
     <Dialog open={open} onClose={handleClose}>
-      <DialogTitle>Añadir Destinatario</DialogTitle>
+      <DialogTitle>Añadir Cliente</DialogTitle>
       <DialogContent>
         <FormCliente
           handleClose={handleClose}

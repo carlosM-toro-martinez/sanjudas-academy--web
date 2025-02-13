@@ -14,6 +14,7 @@ import twentyCent from "../../../assets/images/020.jpg";
 import teenCent from "../../../assets/images/010.jpg";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
+import { Box } from "@mui/material";
 
 const denominationsImages = {
   "200.00": twoHundred,
@@ -121,7 +122,7 @@ function DenominacionForm({
   }, [localDenominaciones, setDenominaciones]);
 
   return (
-    <div className={classes.root}>
+    <Box className={classes.root}>
       <Typography
         variant="h6"
         style={{
@@ -144,6 +145,9 @@ function DenominacionForm({
           <Typography variant="h6" style={{ color: "red" }}>
             {montoRestado.toFixed(2)} Bs
           </Typography>
+          <Typography variant="h6" style={{ color: "red" }}>
+            Resta de caja
+          </Typography>
         </Grid>
         <Grid item style={{ textAlign: "center" }}>
           <Typography variant="h6">
@@ -154,6 +158,9 @@ function DenominacionForm({
         <Grid item>
           <Typography variant="h6" style={{ color: "green" }}>
             + {montoSumado.toFixed(2)} Bs
+          </Typography>
+          <Typography variant="h6" style={{ color: "green" }}>
+            Suma de caja
           </Typography>
         </Grid>
       </Grid>
@@ -172,7 +179,7 @@ function DenominacionForm({
                 e.target.alt = `Sin imagen para ${denom.denominacion}`;
               }}
             />
-            <div className={classes.buttons}>
+            <Box className={classes.buttons}>
               <Button
                 color="secondary"
                 onClick={() => handleDecrease(denom.denominacion)}
@@ -186,7 +193,7 @@ function DenominacionForm({
               <Button onClick={() => handleIncrease(denom.denominacion)}>
                 <AddIcon sx={{ color: "green" }} />
               </Button>
-            </div>
+            </Box>
             {/* Mostrar la diferencia debajo de la cantidad */}
             {diferencias[denom.denominacion] !== 0 && (
               <Typography
@@ -203,7 +210,7 @@ function DenominacionForm({
           </Grid>
         ))}
       </Grid>
-    </div>
+    </Box>
   );
 }
 

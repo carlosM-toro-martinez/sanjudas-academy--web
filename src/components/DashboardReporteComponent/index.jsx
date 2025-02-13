@@ -5,7 +5,7 @@ import ventas from "../../assets/images/icons/ventas.png";
 import alto from "../../assets/images/icons/alto.png";
 import clientes from "../../assets/images/icons/clientes.png";
 import useStyles from "./dasboardReporte.styles";
-import { Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 function DasboardReporteComponent() {
@@ -14,7 +14,7 @@ function DasboardReporteComponent() {
   const data = [
     {
       image: almacen,
-      title: "Almacenes",
+      title: "Compras",
       path: "almacen",
     },
     {
@@ -27,20 +27,20 @@ function DasboardReporteComponent() {
       title: "Ventas",
       path: "venta",
     },
-    {
-      image: clientes,
-      title: "Clientes",
-      path: "cliente",
-    },
+    // {
+    //   image: clientes,
+    //   title: "Clientes",
+    //   path: "cliente",
+    // },
   ];
   const navigate = useNavigate();
   const handleNavigate = (route) => {
     navigate(`/reportes/${route}`);
   };
   return (
-    <div className={classes.container}>
+    <Box className={classes.container}>
       {data.map((item, index) => (
-        <div
+        <Box
           key={index}
           className={classes.card}
           onClick={() => handleNavigate(item.path)}
@@ -57,9 +57,9 @@ function DasboardReporteComponent() {
           >
             {item.title}
           </Typography>
-        </div>
+        </Box>
       ))}
-    </div>
+    </Box>
   );
 }
 

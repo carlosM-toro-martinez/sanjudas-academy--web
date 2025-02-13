@@ -10,34 +10,276 @@ import {
   Collapse,
   Typography,
   Paper,
+  Box,
+  Button,
+  Dialog,
+  DialogContent,
 } from "@mui/material";
-import { makeStyles } from "@material-ui/core/styles";
 import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 import useStyles from "./tableCaja.styles";
+import background from "../../../../assets/images/background.png";
 
 function TableCajaReport({ reportData }) {
   const classes = useStyles();
+  const [pdfBlob, setPdfBlob] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
+
+  // const generatePDF = () => {
+  //   const doc = new jsPDF();
+  //   doc.text("Reporte de Caja", 80, 10);
+
+  //   const tableData = reportData.map((caja) => [
+  //     caja.monto_inicial,
+  //     caja.monto_final,
+  //     new Date(caja.fecha_apertura).toLocaleString(),
+  //     caja.fecha_cierre
+  //       ? new Date(caja.fecha_cierre).toLocaleString()
+  //       : "No cerrado",
+  //     `${caja.trabajadorCierre?.nombre || ""} ${
+  //       caja.trabajadorCierre?.apellido_paterno || ""
+  //     }`,
+  //   ]);
+
+  //   doc.autoTable({
+  //     head: [
+  //       [
+  //         "Monto Inicial",
+  //         "Monto Final",
+  //         "Fecha Apertura",
+  //         "Fecha Cierre",
+  //         "Trabajador",
+  //       ],
+  //     ],
+  //     body: tableData,
+  //     startY: 20,
+  //     theme: "grid",
+  //   });
+
+  //   reportData.forEach((caja) => {
+  //     doc.autoTable({
+  //       head: [
+  //         [
+  //           "Tipo Movimiento",
+  //           "Monto",
+  //           "Fecha Movimiento",
+  //           "Motivo",
+  //           "Trabajador",
+  //         ],
+  //       ],
+  //       body: caja.movimientos.map((movimiento) => [
+  //         movimiento.tipo_movimiento,
+  //         movimiento.monto,
+  //         new Date(movimiento.fecha_movimiento).toLocaleString(),
+  //         movimiento.motivo,
+  //         `${movimiento?.trabajadorMovimiento?.nombre} ${movimiento?.trabajadorMovimiento?.apellido_paterno}`,
+  //       ]),
+  //       startY: doc.previousAutoTable.finalY + 20,
+  //       theme: "striped",
+  //       didDrawPage: (data) => {
+  //         doc.text(`Movimientos de Caja`, 15, data.settings.startY - 5);
+  //       },
+  //     });
+  //   });
+
+  //   // Agregar imagen de fondo
+  //   const img = new Image();
+  //   img.src = background;
+  //   img.onload = () => {
+  //     doc.addImage(img, "PNG", 60, doc.previousAutoTable.finalY + 100, 80, 40);
+  //     const pdfOutput = doc.output("blob");
+  //     setPdfBlob(pdfOutput);
+  //     setOpenDialog(true);
+  //   };
+  // };
+
+  const generatePDF = () => {
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    doc.setFont("Times", "Bold");
+    doc.setFontSize(18);
+    const pageWidth = doc.internal.pageSize.getWidth();
+    doc.text("Reporte de Caja", pageWidth / 2, 15, { align: "center" });
+
+    const cajaTableHeaders = [
+      "Monto Inicial",
+      "Monto Final",
+      "Fecha Apertura",
+      "Fecha Cierre",
+      "Trabajador",
+    ];
+    const cajaTableBody = reportData.map((caja) => [
+      caja.monto_inicial,
+      caja.monto_final,
+      new Date(caja.fecha_apertura).toLocaleString(),
+      caja.fecha_cierre
+        ? new Date(caja.fecha_cierre).toLocaleString()
+        : "No cerrado",
+      `${caja.trabajadorCierre?.nombre || ""} ${
+        caja.trabajadorCierre?.apellido_paterno || ""
+      }`,
+    ]);
+
+    doc.autoTable({
+      head: [cajaTableHeaders],
+      body: cajaTableBody,
+      startY: 25,
+      theme: "grid",
+      headStyles: {
+        fillColor: [0, 51, 102],
+        textColor: 255,
+        fontStyle: "bold",
+        halign: "center",
+      },
+      bodyStyles: {
+        font: "Times",
+        fontSize: 10,
+        halign: "center",
+      },
+      styles: {
+        cellPadding: 3,
+      },
+      margin: { left: 15, right: 15 },
+    });
+
+    reportData.forEach((caja, index) => {
+      const startY = doc.previousAutoTable
+        ? doc.previousAutoTable.finalY + 20
+        : 25;
+      doc.setFont("Times", "Bold");
+      doc.setFontSize(14);
+      doc.text(`Movimientos de Caja - ${index + 1}`, 15, startY - 5);
+
+      const movimientoHeaders = [
+        "Tipo Movimiento",
+        "Monto",
+        "Fecha Movimiento",
+        "Motivo",
+        "Trabajador",
+      ];
+      const movimientoBody = caja.movimientos.map((movimiento) => [
+        movimiento.tipo_movimiento,
+        movimiento.monto,
+        new Date(movimiento.fecha_movimiento).toLocaleString(),
+        movimiento.motivo,
+        `${movimiento?.trabajadorMovimiento?.nombre || ""} ${
+          movimiento?.trabajadorMovimiento?.apellido_paterno || ""
+        }`,
+      ]);
+
+      doc.autoTable({
+        head: [movimientoHeaders],
+        body: movimientoBody,
+        startY: startY,
+        theme: "striped",
+        headStyles: {
+          fillColor: [51, 102, 153],
+          textColor: 255,
+          fontStyle: "bold",
+          halign: "center",
+        },
+        bodyStyles: {
+          font: "Times",
+          fontSize: 10,
+          halign: "center",
+        },
+        styles: {
+          cellPadding: 3,
+        },
+        margin: { left: 15, right: 15 },
+        didDrawPage: (data) => {},
+      });
+    });
+
+    const img = new Image();
+    img.src = background;
+    img.onload = () => {
+      const finalY = doc.previousAutoTable
+        ? doc.previousAutoTable.finalY + 20
+        : 200;
+      doc.addImage(img, "PNG", 60, finalY, 80, 40);
+
+      doc.setFont("Times", "Normal");
+      doc.setFontSize(10);
+      doc.text(
+        "Reporte generado automáticamente",
+        pageWidth / 2,
+        doc.internal.pageSize.getHeight() - 10,
+        { align: "center" }
+      );
+
+      const pdfOutput = doc.output("blob");
+      setPdfBlob(pdfOutput);
+      setOpenDialog(true);
+    };
+  };
 
   return (
-    <TableContainer component={Paper} className={classes.tableContainer}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell />
-            <TableCell>Monto Inicial</TableCell>
-            <TableCell>Monto Final</TableCell>
-            <TableCell>Fecha Apertura</TableCell>
-            <TableCell>Fecha Cierre</TableCell>
-            <TableCell>Trabajador</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {reportData.map((caja) => (
-            <CajaRow key={caja.id_caja} caja={caja} />
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+    <>
+      <Dialog
+        open={openDialog}
+        onClose={() => setOpenDialog(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogContent>
+          {pdfBlob && (
+            <iframe
+              src={URL.createObjectURL(pdfBlob)}
+              width="100%"
+              height="500px"
+              title="Vista previa del PDF"
+            ></iframe>
+          )}
+        </DialogContent>
+      </Dialog>
+      <TableContainer component={Paper} className={classes.tableContainer}>
+        <Table>
+          <TableHead style={{ backgroundColor: "#3d97ef" }}>
+            <TableRow>
+              <TableCell />
+              <TableCell style={{ color: "#fff", fontWeight: "bold" }}>
+                Monto Inicial
+              </TableCell>
+              <TableCell style={{ color: "#fff", fontWeight: "bold" }}>
+                Monto Final
+              </TableCell>
+              <TableCell style={{ color: "#fff", fontWeight: "bold" }}>
+                Fecha Apertura
+              </TableCell>
+              <TableCell style={{ color: "#fff", fontWeight: "bold" }}>
+                Fecha Cierre
+              </TableCell>
+              <TableCell style={{ color: "#fff", fontWeight: "bold" }}>
+                Trabajador
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {reportData.map((caja) => (
+              <CajaRow key={caja.id_caja} caja={caja} />
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <Box
+        sx={{ display: "flex", justifyContent: "center", marginTop: "2rem" }}
+      >
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={generatePDF}
+          style={{ marginBottom: "10px" }}
+        >
+          Guardar Reporte
+        </Button>
+      </Box>
+    </>
   );
 }
 
@@ -47,7 +289,7 @@ function CajaRow({ caja }) {
 
   return (
     <>
-      <TableRow>
+      <TableRow style={{ backgroundColor: "#c7e3ff" }}>
         <TableCell>
           <IconButton
             aria-label="expand row"
@@ -70,11 +312,10 @@ function CajaRow({ caja }) {
         }`}</TableCell>
       </TableRow>
 
-      {/* Colapsable de movimientos */}
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
-            <div className={classes.collapseContainer}>
+            <Box className={classes.collapseContainer}>
               <Typography variant="h6" gutterBottom>
                 Movimientos de Caja
               </Typography>
@@ -97,12 +338,12 @@ function CajaRow({ caja }) {
                         {new Date(movimiento.fecha_movimiento).toLocaleString()}
                       </TableCell>
                       <TableCell>{movimiento.motivo}</TableCell>
-                      <TableCell>{`${movimiento.trabajadorMovimiento.nombre} ${movimiento.trabajadorMovimiento.apellido_paterno}`}</TableCell>
+                      <TableCell>{`${movimiento?.trabajadorMovimiento?.nombre} ${movimiento?.trabajadorMovimiento?.apellido_paterno}`}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
-            </div>
+            </Box>
           </Collapse>
         </TableCell>
       </TableRow>

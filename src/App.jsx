@@ -25,94 +25,114 @@ import Academia from "./pages/Academia";
 import Materias from "./pages/Academia/Materias";
 import Docentes from "./pages/Academia/Docentes";
 import Estudiantes from "./pages/Academia/Estudiantes";
+import Theme from "./theme/Theme";
+import Carreras from "./pages/Academia/Carreras";
+import Ambientes from "./pages/Academia/Ambientes";
+import Inscripciones from "./pages/Academia/Inscripciones";
+import EstudiantesCarreras from "./pages/Academia/EstudiantesCarreras";
 
 function App() {
   const queryClient = new QueryClient();
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <MainContextProvider>
-        <Router>
-          <Routes>
-            <Route
-              element={<ProtectedRoute allowedPermissions={["reportes"]} />}
-            >
-              <Route path="/reportes">
-                <Route path="" element={<Reportes />} />
-                <Route path="almacen" element={<ReportAlmacenesComponent />} />
-                <Route path="caja" element={<ReportCajaComponent />} />
-                <Route path="venta" element={<ReportVentasComponent />} />
-                <Route path="cliente" element={<ReportClientesComponent />} />
+    <Theme>
+      <QueryClientProvider client={queryClient}>
+        <MainContextProvider>
+          <Router>
+            <Routes>
+              <Route
+                element={<ProtectedRoute allowedPermissions={["reportes"]} />}
+              >
+                <Route path="/reportes">
+                  <Route path="" element={<Reportes />} />
+                  <Route
+                    path="almacen"
+                    element={<ReportAlmacenesComponent />}
+                  />
+                  <Route path="caja" element={<ReportCajaComponent />} />
+                  <Route path="venta" element={<ReportVentasComponent />} />
+                  <Route path="cliente" element={<ReportClientesComponent />} />
+                </Route>
               </Route>
-            </Route>
 
-            <Route
-              element={
-                <ProtectedRoute allowedPermissions={["gestion de compras"]} />
-              }
-            >
-              <Route path="/almacenes/crear" element={<CreateAlmacenes />} />
-            </Route>
-
-            <Route
-              element={<ProtectedRoute allowedPermissions={["inventario"]} />}
-            >
-              <Route path="/almacenes" element={<Almacenes />} />
-              <Route path="/movimiento-inventario">
-                <Route path="" element={<MovimientoInventario />} />
-                <Route path="crear" element={<CreateMovementInventario />} />
+              <Route
+                element={
+                  <ProtectedRoute allowedPermissions={["gestion de compras"]} />
+                }
+              >
+                <Route path="/almacenes/crear" element={<CreateAlmacenes />} />
               </Route>
-            </Route>
 
-            <Route
-              element={
-                <ProtectedRoute
-                  allowedPermissions={["gestionar trabajadores"]}
-                />
-              }
-            >
-              <Route path="/trabajadores">
-                <Route path="" element={<Trabajadores />} />
-                <Route path="crear" element={<CreateTrabajadores />} />
+              <Route
+                element={<ProtectedRoute allowedPermissions={["inventario"]} />}
+              >
+                <Route path="/almacenes" element={<Almacenes />} />
+                <Route path="/movimiento-inventario">
+                  <Route path="" element={<MovimientoInventario />} />
+                  <Route path="crear" element={<CreateMovementInventario />} />
+                </Route>
               </Route>
-            </Route>
 
-            <Route
-              element={
-                <ProtectedRoute allowedPermissions={["movimientos de caja"]} />
-              }
-            >
-              <Route path="/movimiento-caja" element={<MovimientoCaja />} />
-            </Route>
-            <Route
-              element={
-                <ProtectedRoute allowedPermissions={["movimientos de caja"]} />
-              }
-            >
-              {/* <Route path="/ventas">
+              <Route
+                element={
+                  <ProtectedRoute
+                    allowedPermissions={["gestionar trabajadores"]}
+                  />
+                }
+              >
+                <Route path="/trabajadores">
+                  <Route path="" element={<Trabajadores />} />
+                  <Route path="crear" element={<CreateTrabajadores />} />
+                </Route>
+              </Route>
+
+              <Route
+                element={
+                  <ProtectedRoute
+                    allowedPermissions={["movimientos de caja"]}
+                  />
+                }
+              >
+                <Route path="/movimiento-caja" element={<MovimientoCaja />} />
+              </Route>
+              <Route
+                element={
+                  <ProtectedRoute
+                    allowedPermissions={["movimientos de caja"]}
+                  />
+                }
+              >
+                <Route path="/perfil" element={<Perfil />} />
+                <Route path="/clientes" element={<Clientes />} />
+              </Route>
+              <Route path="/ventas">
                 <Route path="" element={<Ventas />} />
                 <Route path="crear" element={<CreateVenta />} />
-              </Route> */}
-              <Route path="/perfil" element={<Perfil />} />
-              <Route path="/clientes" element={<Clientes />} />
+              </Route>
               <Route path="/" element={<Inicio />} />
-            </Route>
-            <Route path="/login" element={<LoginComponent />} />
-
-            <Route
-              path="/login/admin/superadmin"
-              element={<LoginAdministradorComponent />}
-            />
-            <Route path="/academia">
-              <Route path="" element={<Academia />} />
-              <Route path="docentes" element={<Docentes />} />
-              <Route path="materias" element={<Materias />} />
-              <Route path="estudiantes" element={<Estudiantes />} />
-            </Route>
-          </Routes>
-        </Router>
-      </MainContextProvider>
-    </QueryClientProvider>
+              <Route path="/login" element={<LoginComponent />} />
+              <Route
+                path="/login/admin/superadmin"
+                element={<LoginAdministradorComponent />}
+              />
+              <Route path="/instituto">
+                <Route path="" element={<Academia />} />
+                <Route path="docentes" element={<Docentes />} />
+                <Route path="materias" element={<Materias />} />
+                <Route path="estudiantes" element={<Estudiantes />} />
+                <Route path="carreras" element={<Carreras />} />
+                <Route path="ambientes" element={<Ambientes />} />
+                <Route path="inscripciones" element={<Inscripciones />} />
+                <Route
+                  path="estudiantes-carreras"
+                  element={<EstudiantesCarreras />}
+                />
+              </Route>
+            </Routes>
+          </Router>
+        </MainContextProvider>
+      </QueryClientProvider>
+    </Theme>
   );
 }
 
