@@ -26,7 +26,7 @@ function FooterComponent() {
             color="textSecondary"
             className={classes.copyRight}
           >
-            © 2024 copyright
+            © 2025 copyright
           </Typography>
         </div>
         <Box

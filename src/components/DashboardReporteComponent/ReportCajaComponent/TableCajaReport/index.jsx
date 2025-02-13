@@ -20,6 +20,7 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import useStyles from "./tableCaja.styles";
 import background from "../../../../assets/images/background.png";
+import { getLocalDateTime } from "../../../../utils/getDate";
 
 function TableCajaReport({ reportData }) {
   const classes = useStyles();
@@ -104,81 +105,39 @@ function TableCajaReport({ reportData }) {
     doc.setFont("Times", "Bold");
     doc.setFontSize(18);
     const pageWidth = doc.internal.pageSize.getWidth();
-    doc.text("Reporte de Caja", pageWidth / 2, 15, { align: "center" });
+    const img = new Image();
+    img.src = background;
+    img.onload = () => {
+      const finalY = doc.previousAutoTable ? doc.previousAutoTable.finalY : 200;
+      doc.addImage(img, "PNG", 8, 5, 20, 20);
+      doc.text("Reporte de Caja", pageWidth / 2, 25, { align: "center" });
 
-    const cajaTableHeaders = [
-      "Monto Inicial",
-      "Monto Final",
-      "Fecha Apertura",
-      "Fecha Cierre",
-      "Trabajador",
-    ];
-    const cajaTableBody = reportData.map((caja) => [
-      caja.monto_inicial,
-      caja.monto_final,
-      new Date(caja.fecha_apertura).toLocaleString(),
-      caja.fecha_cierre
-        ? new Date(caja.fecha_cierre).toLocaleString()
-        : "No cerrado",
-      `${caja.trabajadorCierre?.nombre || ""} ${
-        caja.trabajadorCierre?.apellido_paterno || ""
-      }`,
-    ]);
-
-    doc.autoTable({
-      head: [cajaTableHeaders],
-      body: cajaTableBody,
-      startY: 25,
-      theme: "grid",
-      headStyles: {
-        fillColor: [0, 51, 102],
-        textColor: 255,
-        fontStyle: "bold",
-        halign: "center",
-      },
-      bodyStyles: {
-        font: "Times",
-        fontSize: 10,
-        halign: "center",
-      },
-      styles: {
-        cellPadding: 3,
-      },
-      margin: { left: 15, right: 15 },
-    });
-
-    reportData.forEach((caja, index) => {
-      const startY = doc.previousAutoTable
-        ? doc.previousAutoTable.finalY + 20
-        : 25;
-      doc.setFont("Times", "Bold");
-      doc.setFontSize(14);
-      doc.text(`Movimientos de Caja - ${index + 1}`, 15, startY - 5);
-
-      const movimientoHeaders = [
-        "Tipo Movimiento",
-        "Monto",
-        "Fecha Movimiento",
-        "Motivo",
+      const cajaTableHeaders = [
+        "Monto Inicial",
+        "Monto Final",
+        "Fecha Apertura",
+        "Fecha Cierre",
         "Trabajador",
       ];
-      const movimientoBody = caja.movimientos.map((movimiento) => [
-        movimiento.tipo_movimiento,
-        movimiento.monto,
-        new Date(movimiento.fecha_movimiento).toLocaleString(),
-        movimiento.motivo,
-        `${movimiento?.trabajadorMovimiento?.nombre || ""} ${
-          movimiento?.trabajadorMovimiento?.apellido_paterno || ""
+      const cajaTableBody = reportData.map((caja) => [
+        caja.monto_inicial,
+        caja.monto_final,
+        new Date(caja.fecha_apertura).toLocaleString(),
+        caja.fecha_cierre
+          ? new Date(caja.fecha_cierre).toLocaleString()
+          : "No cerrado",
+        `${caja.trabajadorCierre?.nombre || ""} ${
+          caja.trabajadorCierre?.apellido_paterno || ""
         }`,
       ]);
 
       doc.autoTable({
-        head: [movimientoHeaders],
-        body: movimientoBody,
-        startY: startY,
-        theme: "striped",
+        head: [cajaTableHeaders],
+        body: cajaTableBody,
+        startY: 35,
+        theme: "grid",
         headStyles: {
-          fillColor: [51, 102, 153],
+          fillColor: [0, 51, 102],
           textColor: 255,
           fontStyle: "bold",
           halign: "center",
@@ -192,22 +151,67 @@ function TableCajaReport({ reportData }) {
           cellPadding: 3,
         },
         margin: { left: 15, right: 15 },
-        didDrawPage: (data) => {},
       });
-    });
 
-    const img = new Image();
-    img.src = background;
-    img.onload = () => {
-      const finalY = doc.previousAutoTable
-        ? doc.previousAutoTable.finalY + 20
-        : 200;
-      doc.addImage(img, "PNG", 60, finalY, 80, 40);
+      reportData.forEach((caja, index) => {
+        const startY = doc.previousAutoTable
+          ? doc.previousAutoTable.finalY + 20
+          : 25;
+        doc.setFont("Times", "Bold");
+        doc.setFontSize(14);
+        doc.text(`Movimientos de Caja - ${index + 1}`, 15, startY - 5);
+
+        const movimientoHeaders = [
+          "Tipo Movimiento",
+          "Monto",
+          "Fecha Movimiento",
+          "Motivo",
+          "Trabajador",
+        ];
+        const movimientoBody = caja.movimientos.map((movimiento) => [
+          movimiento.tipo_movimiento,
+          movimiento.monto,
+          new Date(movimiento.fecha_movimiento).toLocaleString(),
+          movimiento.motivo,
+          `${movimiento?.trabajadorMovimiento?.nombre || ""} ${
+            movimiento?.trabajadorMovimiento?.apellido_paterno || ""
+          }`,
+        ]);
+
+        doc.autoTable({
+          head: [movimientoHeaders],
+          body: movimientoBody,
+          startY: startY,
+          theme: "striped",
+          headStyles: {
+            fillColor: [51, 102, 153],
+            textColor: 255,
+            fontStyle: "bold",
+            halign: "center",
+          },
+          bodyStyles: {
+            font: "Times",
+            fontSize: 10,
+            halign: "center",
+          },
+          styles: {
+            cellPadding: 3,
+          },
+          margin: { left: 15, right: 15 },
+          didDrawPage: (data) => {},
+        });
+      });
 
       doc.setFont("Times", "Normal");
       doc.setFontSize(10);
       doc.text(
-        "Reporte generado automáticamente",
+        `--------------------`,
+        pageWidth / 2,
+        doc.internal.pageSize.getHeight() - 40,
+        { align: "center" }
+      );
+      doc.text(
+        `Potosi - ${getLocalDateTime()}`,
         pageWidth / 2,
         doc.internal.pageSize.getHeight() - 10,
         { align: "center" }
