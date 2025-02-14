@@ -26,6 +26,7 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import anularVentaAddService from "../../../../async/services/post/anularVentaAddService";
 import { getLocalDateTime } from "../../../../utils/getDate";
 import { useNavigate } from "react-router-dom";
+import background from "../../../../assets/images/background.png";
 
 function TableVentasReport({ reportData, ventaToday, refetchVentas, caja }) {
   const [utilidades, setUtilidades] = useState([]);
@@ -110,9 +111,26 @@ function TableVentasReport({ reportData, ventaToday, refetchVentas, caja }) {
   const [openDialog, setOpenDialog] = useState(false);
 
   const generatePDF = () => {
-    const doc = new jsPDF();
-    doc.text("Reporte de Ventas", 80, 10);
-    doc.text(` Utilidad Total: ${utilidadGlobal}`, 80, 20);
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+    doc.setFont("Times", "Bold");
+    doc.setFontSize(18);
+    const pageWidth = doc.internal.pageSize.getWidth();
+    doc.text("Reporte de Ventas", pageWidth / 2, 25, { align: "center" });
+    doc.text(` Utilidad Total: ${utilidadGlobal}`, pageWidth / 2, 35, {
+      align: "center",
+    });
+    const img = new Image();
+    img.src = background;
+    img.onload = () => {
+      doc.addImage(img, "PNG", 8, 5, 20, 20);
+      const pdfOutput = doc.output("blob");
+      setPdfBlob(pdfOutput);
+      setOpenDialog(true);
+    };
     const tableData = reportData.map((venta, index) => [
       new Date(venta.fecha_venta).toLocaleDateString(),
       `${venta?.cliente?.nombre} ${venta.cliente.apellido}`,
@@ -136,8 +154,23 @@ function TableVentasReport({ reportData, ventaToday, refetchVentas, caja }) {
         ],
       ],
       body: tableData,
-      startY: 25,
-      theme: "grid",
+      startY: 40,
+      theme: "striped",
+      headStyles: {
+        fillColor: [0, 51, 102],
+        textColor: 255,
+        fontStyle: "bold",
+        halign: "center",
+      },
+      bodyStyles: {
+        font: "Times",
+        fontSize: 10,
+        halign: "center",
+      },
+      styles: {
+        cellPadding: 3,
+      },
+      margin: { left: 15, right: 15 },
     });
     reportData.forEach((venta) => {
       doc.autoTable({
@@ -160,6 +193,21 @@ function TableVentasReport({ reportData, ventaToday, refetchVentas, caja }) {
         ]),
         startY: doc.previousAutoTable.finalY + 20,
         theme: "striped",
+        headStyles: {
+          fillColor: [51, 102, 153],
+          textColor: 255,
+          fontStyle: "bold",
+          halign: "center",
+        },
+        bodyStyles: {
+          font: "Times",
+          fontSize: 10,
+          halign: "center",
+        },
+        styles: {
+          cellPadding: 3,
+        },
+        margin: { left: 15, right: 15 },
         didDrawPage: (data) => {
           doc.text(
             `Detalles de la Venta (${venta.total})`,
@@ -169,6 +217,21 @@ function TableVentasReport({ reportData, ventaToday, refetchVentas, caja }) {
         },
       });
     });
+
+    doc.setFont("Times", "Normal");
+    doc.setFontSize(10);
+    doc.text(
+      `--------------------`,
+      pageWidth / 2,
+      doc.internal.pageSize.getHeight() - 40,
+      { align: "center" }
+    );
+    doc.text(
+      `Potosi - ${getLocalDateTime()}`,
+      pageWidth / 2,
+      doc.internal.pageSize.getHeight() - 10,
+      { align: "center" }
+    );
 
     const pdfOutput = doc.output("blob");
     setPdfBlob(pdfOutput);

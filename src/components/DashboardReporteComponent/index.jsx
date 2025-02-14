@@ -27,11 +27,11 @@ function DasboardReporteComponent() {
       title: "Ventas",
       path: "venta",
     },
-    // {
-    //   image: clientes,
-    //   title: "Clientes",
-    //   path: "cliente",
-    // },
+    {
+      image: clientes,
+      title: "Estudiantes",
+      path: "estudiante",
+    },
   ];
   const navigate = useNavigate();
   const handleNavigate = (route) => {

@@ -272,7 +272,11 @@ function TableCajaReport({ reportData }) {
         </Table>
       </TableContainer>
       <Box
-        sx={{ display: "flex", justifyContent: "center", marginTop: "2rem" }}
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          marginTop: "2rem",
+        }}
       >
         <Button
           variant="contained"

@@ -15,6 +15,7 @@ import {
 import { MoreVert } from "@mui/icons-material";
 import { useMutation } from "react-query";
 import estudianteCarreraDeleteService from "../../async/services/delete/estudianteCarreraDeleteService";
+import ViewEstudianteComponent from "./ViewEstudianteComponent";
 
 const TableEstudiantesCarreraComponent = ({
   estudiantes,
@@ -64,68 +65,67 @@ const TableEstudiantesCarreraComponent = ({
   };
 
   return (
-    <Box style={{ display: "flex", justifyContent: "center" }}>
-      <TableContainer
-        component={Paper}
-        style={{ marginTop: "20px", width: "90%" }}
-      >
-        <Table>
-          <TableHead>
-            <TableRow style={{ backgroundColor: "#1976d2", color: "#fff" }}>
-              <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>
-                ID
-              </TableCell>
-              <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>
-                Nombre
-              </TableCell>
-              <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>
-                Carnet
-              </TableCell>
-              <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>
-                Correo
-              </TableCell>
-              <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>
-                Celular
-              </TableCell>
-              <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>
-                Turno
-              </TableCell>
-              <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>
-                Acciones
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {estudiantes.map((estudiante) => (
-              <TableRow key={estudiante.id_estudiante_carrera}>
-                <TableCell>{estudiante.id_estudiante_carrera}</TableCell>
-                <TableCell>{`${estudiante.nombre} ${estudiante.apellido_paterno} ${estudiante.apellido_materno}`}</TableCell>
-                <TableCell>{estudiante.carnet_identidad}</TableCell>
-                <TableCell>{estudiante.correo}</TableCell>
-                <TableCell>{estudiante.celular}</TableCell>
-                <TableCell>{estudiante.turno}</TableCell>
-                <TableCell>
-                  <IconButton
-                    onClick={(event) => handleMenuOpen(event, estudiante)}
-                  >
-                    <MoreVert />
-                  </IconButton>
+    <>
+      <Box style={{ display: "flex", justifyContent: "center" }}>
+        <TableContainer
+          component={Paper}
+          style={{ marginTop: "20px", width: "90%" }}
+        >
+          <Table>
+            <TableHead>
+              <TableRow style={{ backgroundColor: "#1976d2", color: "#fff" }}>
+                <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>
+                  Nombre
+                </TableCell>
+                <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>
+                  Carnet
+                </TableCell>
+                <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>
+                  Correo
+                </TableCell>
+                <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>
+                  Celular
+                </TableCell>
+                <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>
+                  Turno
+                </TableCell>
+                <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>
+                  Acciones
                 </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-      >
-        <MenuItem onClick={handleEdit}>Editar</MenuItem>
-        <MenuItem onClick={handleDelete}>Eliminar</MenuItem>
-      </Menu>
-    </Box>
+            </TableHead>
+            <TableBody>
+              {estudiantes.map((estudiante) => (
+                <TableRow key={estudiante.id_estudiante_carrera}>
+                  <TableCell>{`${estudiante.nombre} ${estudiante.apellido_paterno} ${estudiante.apellido_materno}`}</TableCell>
+                  <TableCell>{estudiante.carnet_identidad}</TableCell>
+                  <TableCell>{estudiante.correo}</TableCell>
+                  <TableCell>{estudiante.celular}</TableCell>
+                  <TableCell>{estudiante.turno}</TableCell>
+                  <TableCell>
+                    <IconButton
+                      onClick={(event) => handleMenuOpen(event, estudiante)}
+                    >
+                      <MoreVert />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleMenuClose}
+        >
+          <MenuItem onClick={handleEdit}>Ver</MenuItem>
+          <MenuItem onClick={handleEdit}>Editar</MenuItem>
+          <MenuItem onClick={handleDelete}>Eliminar</MenuItem>
+        </Menu>
+      </Box>
+      <ViewEstudianteComponent estudiante={selectedEstudiante} />
+    </>
   );
 };
 

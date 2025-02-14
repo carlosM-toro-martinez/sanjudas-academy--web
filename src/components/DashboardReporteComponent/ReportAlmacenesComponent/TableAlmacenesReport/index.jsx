@@ -20,6 +20,7 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import useStyles from "./tableAlmacenes.styles";
 import background from "../../../../assets/images/background.png";
+import { getLocalDateTime } from "../../../../utils/getDate";
 
 function Row({ row }) {
   const [open, setOpen] = useState(false);
@@ -30,7 +31,6 @@ function Row({ row }) {
       acc + lote.detalleCompra.precio_unitario * lote.detalleCompra.cantidad,
     0
   );
-console.log(row);
 
   return (
     <>
@@ -126,9 +126,23 @@ export default function TableAlmacenesReport({ reportData }) {
   const [openDialog, setOpenDialog] = useState(false);
 
   const generatePDF = () => {
-    const doc = new jsPDF();
-    doc.text("Reporte de Almacenes", 80, 10);
-
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+    doc.setFont("Times", "Bold");
+    doc.setFontSize(18);
+    const pageWidth = doc.internal.pageSize.getWidth();
+    doc.text("Reporte de Almacenes", pageWidth / 2, 25, { align: "center" });
+    const img = new Image();
+    img.src = background;
+    img.onload = () => {
+      doc.addImage(img, "PNG", 8, 5, 20, 20);
+      const pdfOutput = doc.output("blob");
+      setPdfBlob(pdfOutput);
+      setOpenDialog(true);
+    };
     const tableData = reportData.map((row) => [
       row.numero_lote,
       row.lotes.reduce((acc, lote) => acc + lote.cantidad, 0),
@@ -153,8 +167,23 @@ export default function TableAlmacenesReport({ reportData }) {
         ],
       ],
       body: tableData,
-      startY: 20,
-      theme: "grid",
+      startY: 40,
+      theme: "striped",
+      headStyles: {
+        fillColor: [0, 51, 102],
+        textColor: 255,
+        fontStyle: "bold",
+        halign: "center",
+      },
+      bodyStyles: {
+        font: "Times",
+        fontSize: 10,
+        halign: "center",
+      },
+      styles: {
+        cellPadding: 3,
+      },
+      margin: { left: 15, right: 15 },
     });
 
     reportData.forEach((row) => {
@@ -181,6 +210,21 @@ export default function TableAlmacenesReport({ reportData }) {
         ]),
         startY: doc.previousAutoTable.finalY + 20,
         theme: "striped",
+        headStyles: {
+          fillColor: [51, 102, 153],
+          textColor: 255,
+          fontStyle: "bold",
+          halign: "center",
+        },
+        bodyStyles: {
+          font: "Times",
+          fontSize: 10,
+          halign: "center",
+        },
+        styles: {
+          cellPadding: 3,
+        },
+        margin: { left: 15, right: 15 },
         didDrawPage: (data) => {
           doc.text(
             `Detalles del Lote ${row.numero_lote}`,
@@ -191,14 +235,24 @@ export default function TableAlmacenesReport({ reportData }) {
       });
     });
 
-    const img = new Image();
-    img.src = background;
-    img.onload = () => {
-      doc.addImage(img, "PNG", 60, doc.previousAutoTable.finalY + 100, 80, 40);
-      const pdfOutput = doc.output("blob");
-      setPdfBlob(pdfOutput);
-      setOpenDialog(true);
-    };
+    doc.setFont("Times", "Normal");
+    doc.setFontSize(10);
+    doc.text(
+      `--------------------`,
+      pageWidth / 2,
+      doc.internal.pageSize.getHeight() - 40,
+      { align: "center" }
+    );
+    doc.text(
+      `Potosi - ${getLocalDateTime()}`,
+      pageWidth / 2,
+      doc.internal.pageSize.getHeight() - 10,
+      { align: "center" }
+    );
+
+    const pdfOutput = doc.output("blob");
+    setPdfBlob(pdfOutput);
+    setOpenDialog(true);
   };
 
   return (
@@ -253,7 +307,11 @@ export default function TableAlmacenesReport({ reportData }) {
         </Table>
       </TableContainer>
       <Box
-        sx={{ display: "flex", justifyContent: "center", marginTop: "2rem" }}
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          marginTop: "2rem",
+        }}
       >
         <Button
           variant="contained"

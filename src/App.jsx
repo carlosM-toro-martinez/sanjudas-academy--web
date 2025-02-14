@@ -30,6 +30,7 @@ import Carreras from "./pages/Academia/Carreras";
 import Ambientes from "./pages/Academia/Ambientes";
 import Inscripciones from "./pages/Academia/Inscripciones";
 import EstudiantesCarreras from "./pages/Academia/EstudiantesCarreras";
+import ReportEstudiantesComponent from "./components/DashboardReporteComponent/ReportEstudiantesComponent";
 
 function App() {
   const queryClient = new QueryClient();
@@ -52,6 +53,10 @@ function App() {
                   <Route path="caja" element={<ReportCajaComponent />} />
                   <Route path="venta" element={<ReportVentasComponent />} />
                   <Route path="cliente" element={<ReportClientesComponent />} />
+                  <Route
+                    path="estudiante"
+                    element={<ReportEstudiantesComponent />}
+                  />
                 </Route>
               </Route>
 

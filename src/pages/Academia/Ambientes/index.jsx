@@ -6,6 +6,7 @@ import ambienteService from "../../../async/services/get/ambienteService";
 import { useQuery } from "react-query";
 import TableAmbientesComponent from "../../../components/TableAmbientesComponent";
 import AddIcon from "@mui/icons-material/Add";
+import SeatMap from "./SeatMap";
 
 function Ambientes() {
   const {
@@ -59,6 +60,17 @@ function Ambientes() {
         >
           Añadir Ambiente
         </Button>
+      </Box>
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          bgcolor: "grey.200",
+        }}
+      >
+        <SeatMap />
       </Box>
     </DrawerComponent>
   );
