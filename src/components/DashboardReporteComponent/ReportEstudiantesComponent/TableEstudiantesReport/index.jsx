@@ -22,14 +22,12 @@ const TableEstudiantesReport = ({ reportData }) => {
   const [pdfBlob, setPdfBlob] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
 
-  // Función para agrupar y contar estudiantes por día según la fecha de inscripción
   const getStudentsCountPerDay = () => {
     const countMap = {};
     reportData.forEach((student) => {
       const fecha = new Date(student.fecha_inscripcion).toLocaleDateString();
       countMap[fecha] = (countMap[fecha] || 0) + 1;
     });
-    // Convierte el objeto a un arreglo de objetos con { fecha, count }
     return Object.entries(countMap).map(([fecha, count]) => ({ fecha, count }));
   };
 
@@ -97,7 +95,6 @@ const TableEstudiantesReport = ({ reportData }) => {
         margin: { left: 15, right: 15 },
       });
 
-      // Resumen: cantidad de estudiantes registrados por día
       const summaryData = getStudentsCountPerDay();
       const summaryTableHeaders = ["Fecha", "Cantidad de Estudiantes"];
       const summaryStartY = doc.previousAutoTable.finalY + 20;
@@ -133,7 +130,6 @@ const TableEstudiantesReport = ({ reportData }) => {
         margin: { left: 15, right: 15 },
       });
 
-      // Pie de página
       doc.setFont("Times", "Normal");
       doc.setFontSize(10);
       doc.text(

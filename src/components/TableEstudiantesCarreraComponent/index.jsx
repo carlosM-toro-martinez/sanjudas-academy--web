@@ -11,6 +11,7 @@ import {
   Box,
   Menu,
   MenuItem,
+  Dialog,
 } from "@mui/material";
 import { MoreVert } from "@mui/icons-material";
 import { useMutation } from "react-query";
@@ -23,6 +24,7 @@ const TableEstudiantesCarreraComponent = ({
 }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedEstudiante, setSelectedEstudiante] = useState(null);
+  const [openViewDialog, setOpenViewDialog] = useState(false);
 
   const handleMenuOpen = (event, estudiante) => {
     setAnchorEl(event.currentTarget);
@@ -31,6 +33,12 @@ const TableEstudiantesCarreraComponent = ({
 
   const handleMenuClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleView = (estudiante) => {
+    setSelectedEstudiante(estudiante);
+    setOpenViewDialog(true);
+    handleMenuClose();
   };
 
   const handleEdit = () => {
@@ -75,7 +83,10 @@ const TableEstudiantesCarreraComponent = ({
             <TableHead>
               <TableRow style={{ backgroundColor: "#1976d2", color: "#fff" }}>
                 <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>
-                  Nombre
+                  Nombre y Apellido
+                </TableCell>
+                <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>
+                  RU
                 </TableCell>
                 <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>
                   Carnet
@@ -90,24 +101,35 @@ const TableEstudiantesCarreraComponent = ({
                   Turno
                 </TableCell>
                 <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>
-                  Acciones
+                  Estado
                 </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {estudiantes.map((estudiante) => (
-                <TableRow key={estudiante.id_estudiante_carrera}>
+                <TableRow
+                  key={estudiante.id_estudiante_carrera}
+                  onClick={() => handleView(estudiante)}
+                  sx={{
+                    ":hover": {
+                      backgroundColor: "gray",
+                      cursor: "pointer",
+                    },
+                  }}
+                >
                   <TableCell>{`${estudiante.nombre} ${estudiante.apellido_paterno} ${estudiante.apellido_materno}`}</TableCell>
+                  <TableCell>{estudiante.ru}</TableCell>
                   <TableCell>{estudiante.carnet_identidad}</TableCell>
                   <TableCell>{estudiante.correo}</TableCell>
                   <TableCell>{estudiante.celular}</TableCell>
                   <TableCell>{estudiante.turno}</TableCell>
-                  <TableCell>
-                    <IconButton
-                      onClick={(event) => handleMenuOpen(event, estudiante)}
-                    >
-                      <MoreVert />
-                    </IconButton>
+                  <TableCell
+                    sx={{
+                      textTransform: "capitalize",
+                      color: estudiante.estado === "activo" ? "green" : "red",
+                    }}
+                  >
+                    {estudiante.estado}
                   </TableCell>
                 </TableRow>
               ))}
@@ -119,12 +141,21 @@ const TableEstudiantesCarreraComponent = ({
           open={Boolean(anchorEl)}
           onClose={handleMenuClose}
         >
-          <MenuItem onClick={handleEdit}>Ver</MenuItem>
+          <MenuItem onClick={handleView}>Ver</MenuItem>
           <MenuItem onClick={handleEdit}>Editar</MenuItem>
           <MenuItem onClick={handleDelete}>Eliminar</MenuItem>
         </Menu>
       </Box>
-      <ViewEstudianteComponent estudiante={selectedEstudiante} />
+      <Dialog
+        open={openViewDialog}
+        onClose={() => setOpenViewDialog(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        {selectedEstudiante && (
+          <ViewEstudianteComponent estudiante={selectedEstudiante} />
+        )}
+      </Dialog>
     </>
   );
 };

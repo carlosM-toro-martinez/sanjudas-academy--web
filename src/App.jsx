@@ -29,6 +29,7 @@ import Theme from "./theme/Theme";
 import Carreras from "./pages/Academia/Carreras";
 import Ambientes from "./pages/Academia/Ambientes";
 import Inscripciones from "./pages/Academia/Inscripciones";
+import Mensualidades from "./pages/Academia/Mensualidades";
 import EstudiantesCarreras from "./pages/Academia/EstudiantesCarreras";
 import ReportEstudiantesComponent from "./components/DashboardReporteComponent/ReportEstudiantesComponent";
 
@@ -132,6 +133,7 @@ function App() {
                   path="estudiantes-carreras"
                   element={<EstudiantesCarreras />}
                 />
+                <Route path="mensualidades" element={<Mensualidades />} />
               </Route>
             </Routes>
           </Router>

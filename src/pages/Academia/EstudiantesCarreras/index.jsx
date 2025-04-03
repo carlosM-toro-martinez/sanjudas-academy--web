@@ -39,15 +39,6 @@ function EstudiantesCarreras() {
           handleClose={handleCloseDialog}
         />
       </Dialog>
-
-      <Box style={{ marginTop: "2rem" }}>
-        {!isLoadingEstudiantes ? (
-          <TableEstudiantesCarreraComponent
-            estudiantes={estudiantes}
-            refetchEstudiantes={refetchEstudiantes}
-          />
-        ) : null}
-      </Box>
       <Box
         style={{ marginTop: "2rem", display: "flex", justifyContent: "center" }}
       >
@@ -59,6 +50,14 @@ function EstudiantesCarreras() {
         >
           Añadir Estudiante
         </Button>
+      </Box>
+      <Box style={{ marginTop: "2rem" }}>
+        {!isLoadingEstudiantes ? (
+          <TableEstudiantesCarreraComponent
+            estudiantes={estudiantes}
+            refetchEstudiantes={refetchEstudiantes}
+          />
+        ) : null}
       </Box>
     </DrawerComponent>
   );

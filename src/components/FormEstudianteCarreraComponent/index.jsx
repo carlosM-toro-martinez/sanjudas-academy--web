@@ -14,35 +14,43 @@ import { useMutation, useQuery } from "react-query";
 import Alert from "@mui/material/Alert";
 import useStyles from "./formEstudianteCarrera.styles";
 import estudianteCarreraAddService from "../../async/services/post/estudianteCarreraAddService";
+import estudianteCarreraUpdateService from "../../async/services/put/estudianteCarreraUpdateService";
 import carreraService from "../../async/services/get/carreraService";
 
-function FormEstudianteCarreraComponent({ handleClose, refetchEstudiantes }) {
+function FormEstudianteCarreraComponent({
+  handleClose,
+  refetchEstudiantes,
+  estudiante: estudianteEdit,
+}) {
   const classes = useStyles();
+
   const [estudiante, setEstudiante] = useState({
-    carnet_identidad: "",
-    gestion: "",
-    id_carrera: "",
-    nivel: "",
-    turno: "",
-    nombre: "",
-    apellido_paterno: "",
-    apellido_materno: "",
-    domicilio: "",
-    correo: "",
-    celular: "",
-    anio_egreso: "",
-    colegio: "",
-    apoderado_nombre: "",
-    apoderado_apellido: "",
-    estado_civil: "",
-    sexo: "",
-    numero_apoderado: "",
-    numero_diploma: "",
-    foto: "",
-    fecha_inscripcion: "",
-    ru: "",
-    password: "",
+    carnet_identidad: estudianteEdit ? estudianteEdit.carnet_identidad : "",
+    gestion: estudianteEdit ? estudianteEdit.gestion : "",
+    id_carrera: estudianteEdit ? estudianteEdit.id_carrera : "",
+    nivel: estudianteEdit ? estudianteEdit.nivel : "",
+    turno: estudianteEdit ? estudianteEdit.turno : "",
+    nombre: estudianteEdit ? estudianteEdit.nombre : "",
+    apellido_paterno: estudianteEdit ? estudianteEdit.apellido_paterno : "",
+    apellido_materno: estudianteEdit ? estudianteEdit.apellido_materno : "",
+    domicilio: estudianteEdit ? estudianteEdit.domicilio : "",
+    correo: estudianteEdit ? estudianteEdit.correo : "",
+    celular: estudianteEdit ? estudianteEdit.celular : "",
+    anio_egreso: estudianteEdit ? estudianteEdit.anio_egreso : "",
+    colegio: estudianteEdit ? estudianteEdit.colegio : "",
+    apoderado_nombre: estudianteEdit ? estudianteEdit.apoderado_nombre : "",
+    apoderado_apellido: estudianteEdit ? estudianteEdit.apoderado_apellido : "",
+    estado_civil: estudianteEdit ? estudianteEdit.estado_civil : "",
+    sexo: estudianteEdit ? estudianteEdit.sexo : "",
+    numero_apoderado: estudianteEdit ? estudianteEdit.numero_apoderado : "",
+    numero_diploma: estudianteEdit ? estudianteEdit.numero_diploma : "",
+    foto: estudianteEdit ? estudianteEdit.foto : "",
+    fecha_inscripcion: estudianteEdit ? estudianteEdit.fecha_inscripcion : "",
+    ru: estudianteEdit ? estudianteEdit.ru : "",
+    password: estudianteEdit ? estudianteEdit.password : "",
+    estado: estudianteEdit ? estudianteEdit.estado : "activo",
   });
+
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -62,16 +70,14 @@ function FormEstudianteCarreraComponent({ handleClose, refetchEstudiantes }) {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  const mutation = useMutation(estudianteCarreraAddService, {
+  const mutationCreate = useMutation(estudianteCarreraAddService, {
     onSuccess: () => {
       setSnackbar({
         open: true,
         message: "¡Estudiante de Carrera creado exitosamente!",
         severity: "success",
       });
-      if (handleClose) {
-        handleClose();
-      }
+      if (handleClose) handleClose();
       refetchEstudiantes();
     },
     onError: (error) => {
@@ -83,9 +89,38 @@ function FormEstudianteCarreraComponent({ handleClose, refetchEstudiantes }) {
     },
   });
 
+  const mutationUpdate = useMutation(estudianteCarreraUpdateService, {
+    onSuccess: () => {
+      setSnackbar({
+        open: true,
+        message: "¡Estudiante de Carrera actualizado exitosamente!",
+        severity: "success",
+      });
+      if (handleClose) handleClose();
+      refetchEstudiantes();
+    },
+    onError: (error) => {
+      setSnackbar({
+        open: true,
+        message: `Error al actualizar el estudiante: ${error.message}`,
+        severity: "error",
+      });
+    },
+  });
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    mutation.mutate(estudiante);
+    if (estudianteEdit) {
+      console.log(estudianteEdit);
+
+      // Para la edición se envían 2 parámetros: el id y el payload
+      mutationUpdate.mutate({
+        id: estudianteEdit.id_estudiante_carrera,
+        payload: estudiante,
+      });
+    } else {
+      mutationCreate.mutate(estudiante);
+    }
   };
 
   const handleCancel = (e) => {
@@ -113,8 +148,9 @@ function FormEstudianteCarreraComponent({ handleClose, refetchEstudiantes }) {
       fecha_inscripcion: "",
       ru: "",
       password: "",
+      estado: "activo",
     });
-    handleClose();
+    if (handleClose) handleClose();
     refetchEstudiantes();
   };
 
@@ -126,7 +162,9 @@ function FormEstudianteCarreraComponent({ handleClose, refetchEstudiantes }) {
           className={classes.title}
           style={{ marginBottom: "2rem", fontWeight: "bold" }}
         >
-          Crear Estudiante de Carrera
+          {estudianteEdit
+            ? "Editar Estudiante de Carrera"
+            : "Crear Estudiante de Carrera"}
         </Typography>
         <Grid container spacing={4}>
           <Grid item xs={4}>
@@ -366,6 +404,38 @@ function FormEstudianteCarreraComponent({ handleClose, refetchEstudiantes }) {
             />
           </Grid>
           <Grid item xs={4}>
+            <FormControl fullWidth required className={classes.input}>
+              <InputLabel id="select-estado-label">Estado</InputLabel>
+              <Select
+                labelId="select-estado-label"
+                label="Estado"
+                name="estado"
+                value={estudiante.estado}
+                onChange={handleChange}
+                sx={{
+                  color:
+                    estudiante.estado === "activo"
+                      ? "green"
+                      : estudiante.estado === "retirado"
+                      ? "red"
+                      : estudiante.estado === "congelado"
+                      ? "blue"
+                      : "inherit",
+                }}
+              >
+                <MenuItem value="activo" sx={{ color: "green" }}>
+                  Activo
+                </MenuItem>
+                <MenuItem value="retirado" sx={{ color: "red" }}>
+                  Retirado
+                </MenuItem>
+                <MenuItem value="congelado" sx={{ color: "blue" }}>
+                  Congelado
+                </MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={4}>
             <TextField
               label="Contraseña"
               name="password"
@@ -381,7 +451,7 @@ function FormEstudianteCarreraComponent({ handleClose, refetchEstudiantes }) {
               variant="contained"
               color="error"
               className={classes.button}
-              disabled={mutation.isLoading}
+              disabled={mutationCreate.isLoading || mutationUpdate.isLoading}
               onClick={handleCancel}
             >
               Cancelar
@@ -393,9 +463,13 @@ function FormEstudianteCarreraComponent({ handleClose, refetchEstudiantes }) {
               variant="contained"
               color="primary"
               className={classes.button}
-              disabled={mutation.isLoading}
+              disabled={mutationCreate.isLoading || mutationUpdate.isLoading}
             >
-              {mutation.isLoading
+              {estudianteEdit
+                ? mutationUpdate.isLoading
+                  ? "Actualizando..."
+                  : "Actualizar Estudiante de Carrera"
+                : mutationCreate.isLoading
                 ? "Creando..."
                 : "Crear Estudiante de Carrera"}
             </Button>

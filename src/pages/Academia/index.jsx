@@ -9,6 +9,7 @@ import DrawerComponent from "../../components/DrawerComponent";
 import EarbudsIcon from "@mui/icons-material/Earbuds";
 import ChairAltIcon from "@mui/icons-material/ChairAlt";
 import ChecklistRtlIcon from "@mui/icons-material/ChecklistRtl";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 
 function Academia() {
   const classes = useStyles();
@@ -51,6 +52,11 @@ function Academia() {
       title: "Inscripciones",
       icon: <ChecklistRtlIcon sx={{ fontSize: "5rem" }} />,
       path: "/instituto/inscripciones",
+    },
+    {
+      title: "Mensualidades",
+      icon: <AttachMoneyIcon sx={{ fontSize: "5rem" }} />,
+      path: "/instituto/mensualidades",
     },
   ];
 
