@@ -27,10 +27,15 @@ function DasboardReporteComponent() {
       title: "Ventas",
       path: "venta",
     },
+    // {
+    //   image: clientes,
+    //   title: "Estudiantes",
+    //   path: "estudiante",
+    // },
     {
-      image: clientes,
-      title: "Estudiantes",
-      path: "estudiante",
+      image: alto,
+      title: "Pagos Estudiantes",
+      path: "pagos",
     },
   ];
   const navigate = useNavigate();

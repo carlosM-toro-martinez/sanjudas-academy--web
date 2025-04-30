@@ -32,6 +32,7 @@ import Inscripciones from "./pages/Academia/Inscripciones";
 import Mensualidades from "./pages/Academia/Mensualidades";
 import EstudiantesCarreras from "./pages/Academia/EstudiantesCarreras";
 import ReportEstudiantesComponent from "./components/DashboardReporteComponent/ReportEstudiantesComponent";
+import ReportPagoMensualidad from "./components/DashboardReporteComponent/ReportPagoMensualidad";
 
 function App() {
   const queryClient = new QueryClient();
@@ -58,6 +59,7 @@ function App() {
                     path="estudiante"
                     element={<ReportEstudiantesComponent />}
                   />
+                  <Route path="pagos" element={<ReportPagoMensualidad />} />
                 </Route>
               </Route>
 
