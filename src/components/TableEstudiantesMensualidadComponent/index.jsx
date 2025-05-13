@@ -69,10 +69,9 @@ const TableEstudiantesMensualidadComponent = ({
 
   const filteredEstudiantes = estudiantes.filter((est) => {
     const term = searchTerm?.toLowerCase();
-    return (
-      est.nombre?.toLowerCase().includes(term) ||
-      est.ru?.toLowerCase().includes(term)
-    );
+    const nombre = String(est.nombre || "").toLowerCase();
+    const ru = String(est.ru || "").toLowerCase();
+    return nombre.includes(term) || ru.includes(term);
   });
 
   const modulos = Array.from(
@@ -124,7 +123,6 @@ const TableEstudiantesMensualidadComponent = ({
             {filteredEstudiantes.map((estudiante) => (
               <TableRow key={estudiante.id_estudiante_carrera}>
                 <TableCell>{`${estudiante.nombre} ${estudiante.apellido_paterno} ${estudiante.apellido_materno}`}</TableCell>
-
                 <TableCell>{estudiante.ru}</TableCell>
                 {modulos.map((modulo) => {
                   const pago = estudiante.estudianteMensualidad.find(
