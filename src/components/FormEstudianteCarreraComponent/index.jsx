@@ -46,7 +46,7 @@ function FormEstudianteCarreraComponent({
     numero_diploma: estudianteEdit ? estudianteEdit.numero_diploma : "",
     foto: estudianteEdit ? estudianteEdit.foto : "",
     fecha_inscripcion: estudianteEdit ? estudianteEdit.fecha_inscripcion : "",
-    ru: estudianteEdit ? estudianteEdit.ru : "",
+    //ru: estudianteEdit ? estudianteEdit.ru : "",
     password: estudianteEdit ? estudianteEdit.password : "",
     estado: estudianteEdit ? estudianteEdit.estado : "activo",
   });
@@ -146,7 +146,6 @@ function FormEstudianteCarreraComponent({
       numero_diploma: "",
       foto: "",
       fecha_inscripcion: "",
-      ru: "",
       password: "",
       estado: "activo",
     });
@@ -393,7 +392,7 @@ function FormEstudianteCarreraComponent({
               className={classes.input}
             />
           </Grid>
-          <Grid item xs={4}>
+          {/* <Grid item xs={4}>
             <TextField
               label="RU"
               name="ru"
@@ -402,7 +401,7 @@ function FormEstudianteCarreraComponent({
               fullWidth
               className={classes.input}
             />
-          </Grid>
+          </Grid> */}
           <Grid item xs={4}>
             <FormControl fullWidth required className={classes.input}>
               <InputLabel id="select-estado-label">Estado</InputLabel>

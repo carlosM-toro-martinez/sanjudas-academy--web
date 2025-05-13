@@ -38,21 +38,21 @@ function Academia() {
       icon: <EarbudsIcon sx={{ fontSize: "5rem" }} />,
       path: "/instituto/carreras",
     },
-    {
-      title: "Ambientes",
-      icon: <ChairAltIcon sx={{ fontSize: "5rem" }} />,
-      path: "/instituto/ambientes",
-    },
+    // {
+    //   title: "Ambientes",
+    //   icon: <ChairAltIcon sx={{ fontSize: "5rem" }} />,
+    //   path: "/instituto/ambientes",
+    // },
     {
       title: "Estudiantes",
       icon: <PeopleIcon sx={{ fontSize: "5rem" }} />,
       path: "/instituto/estudiantes-carreras",
     },
-    {
-      title: "Inscripciones",
-      icon: <ChecklistRtlIcon sx={{ fontSize: "5rem" }} />,
-      path: "/instituto/inscripciones",
-    },
+    // {
+    //   title: "Inscripciones",
+    //   icon: <ChecklistRtlIcon sx={{ fontSize: "5rem" }} />,
+    //   path: "/instituto/inscripciones",
+    // },
     {
       title: "Mensualidades",
       icon: <AttachMoneyIcon sx={{ fontSize: "5rem" }} />,
@@ -62,7 +62,7 @@ function Academia() {
 
   return (
     <DrawerComponent>
-      <Typography
+      {/* <Typography
         variant="h6"
         style={{
           marginTop: "3rem",
@@ -86,7 +86,7 @@ function Academia() {
             </Link>
           </Grid>
         ))}
-      </Grid>
+      </Grid> */}
       <Typography
         variant="h6"
         style={{

@@ -5,6 +5,10 @@ import Alert from "@mui/material/Alert";
 import useStyles from "./mensualidadModulo.styles";
 import pagoMensualidadAddService from "../../async/services/post/pagoMensualidadAddService";
 import { getLocalDateTime } from "../../utils/getDate";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import { Dialog, DialogContent } from "@mui/material";
+import logo from "../../assets/images/logos/3.png";
 
 function FormMensualidadModulo({
   estudiante,
@@ -18,6 +22,65 @@ function FormMensualidadModulo({
     observacion: "",
     fecha_pago: getLocalDateTime().split(" ")[0],
     monto: "",
+  };
+  const [pdfBlob, setPdfBlob] = useState(null);
+  const [openPdf, setOpenPdf] = useState(false);
+
+  const generarPDF = (data) => {
+    const doc = new jsPDF();
+
+    const logoBase64 = logo;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("SAINT JUDE THADDEE", 14, 20);
+    doc.addImage(logoBase64, "PNG", 160, 10, 35, 20);
+
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text("Recibo de Pago de Mensualidad", 14, 30);
+
+    doc.autoTable({
+      startY: 40,
+      head: [["Campo", "Valor"]],
+      body: [
+        [
+          "Estudiante",
+          `${estudiante?.nombre || ""} ${estudiante?.apellido_paterno || ""} ${
+            estudiante?.apellido_materno || ""
+          }`,
+        ],
+        ["Módulo", data.modulo],
+        ["Fecha de Pago", data.fecha_pago],
+        ["Monto", `Bs. ${data.monto}`],
+        ["Observación", data.observacion || "-"],
+      ],
+      theme: "striped",
+      styles: {
+        fontSize: 11,
+        cellPadding: 4,
+      },
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: [255, 255, 255],
+        fontStyle: "bold",
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245],
+      },
+      margin: { top: 40 },
+    });
+
+    doc.setFontSize(10);
+    doc.text(
+      "Gracias por su pago. Este recibo es generado automáticamente.",
+      14,
+      doc.internal.pageSize.height - 20
+    );
+
+    const pdfOutput = doc.output("blob");
+    setPdfBlob(pdfOutput);
+    setOpenPdf(true);
   };
 
   const [mensualidad, setMensualidad] = useState(initialState);
@@ -45,11 +108,9 @@ function FormMensualidadModulo({
         message: "¡Pago de mensualidad creado exitosamente!",
         severity: "success",
       });
-      if (handleClose) {
-        handleClose();
-      }
+
+      generarPDF(mensualidad);
       refetchMensualidades();
-      handleCancel();
     },
     onError: (error) => {
       setSnackbar({
@@ -67,6 +128,14 @@ function FormMensualidadModulo({
 
   const handleCancel = () => {
     setMensualidad(initialState);
+    if (handleClose) {
+      handleClose();
+    }
+  };
+
+  const handlePdfDialogClose = () => {
+    setOpenPdf(false);
+    handleCancel();
     if (handleClose) {
       handleClose();
     }
@@ -171,6 +240,23 @@ function FormMensualidadModulo({
           {snackbar.message}
         </Alert>
       </Snackbar>
+      <Dialog
+        open={openPdf}
+        onClose={handlePdfDialogClose}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogContent>
+          {pdfBlob && (
+            <iframe
+              src={URL.createObjectURL(pdfBlob)}
+              width="100%"
+              height="500px"
+              title="Vista previa del PDF"
+            ></iframe>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

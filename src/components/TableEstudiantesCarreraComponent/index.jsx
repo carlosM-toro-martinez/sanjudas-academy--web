@@ -285,7 +285,10 @@ const TableEstudiantesCarreraComponent = ({
         fullWidth
       >
         {selectedEstudiante && (
-          <ViewEstudianteComponent estudiante={selectedEstudiante} />
+          <ViewEstudianteComponent
+            estudiante={selectedEstudiante}
+            refetchEstudiantes={refetchEstudiantes}
+          />
         )}
       </Dialog>
     </>

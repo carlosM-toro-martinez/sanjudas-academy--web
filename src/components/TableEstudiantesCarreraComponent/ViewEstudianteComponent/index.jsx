@@ -14,7 +14,7 @@ import "jspdf-autotable";
 import background from "../../../assets/images/background.png";
 import FormEstudianteCarreraComponent from "../../FormEstudianteCarreraComponent";
 
-function ViewEstudianteComponent({ estudiante }) {
+function ViewEstudianteComponent({ estudiante, refetchEstudiantes }) {
   const [pdfBlob, setPdfBlob] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
@@ -44,7 +44,7 @@ function ViewEstudianteComponent({ estudiante }) {
       }
     );
     currentY += 5;
-    doc.text('PRIVADO "SAN JUDAS TADEO"', pageWidth / 2, currentY, {
+    doc.text('PRIVADO "SAINT JUDE THADDEE"', pageWidth / 2, currentY, {
       align: "center",
     });
     currentY += 5;
@@ -67,9 +67,6 @@ function ViewEstudianteComponent({ estudiante }) {
     doc.line(marginLeft, currentY, pageWidth - marginRight, currentY);
     currentY += 8;
 
-    // ----------------------------------------------------------------------------
-    // SUBENCABEZADO: SECCIÓN / CARRERA / TURNO
-    // ----------------------------------------------------------------------------
     const subHeaderHeight = 12;
     const colWidth = (pageWidth - marginLeft - marginRight) / 3;
     doc.setLineWidth(0.2);
@@ -85,14 +82,14 @@ function ViewEstudianteComponent({ estudiante }) {
     doc.setFontSize(9);
     doc.text("SECCIÓN:", marginLeft + 2, currentY + 7);
     doc.setFont("Helvetica", "normal");
-    doc.text(estudiante?.seccion || "N/A", marginLeft + 25, currentY + 7);
+    doc.text(estudiante?.seccion || "", marginLeft + 25, currentY + 7);
 
     // Carrera
     doc.setFont("Helvetica", "bold");
     doc.text("CARRERA:", marginLeft + colWidth + 2, currentY + 7);
     doc.setFont("Helvetica", "normal");
     doc.text(
-      estudiante?.carrera || "N/A",
+      estudiante?.carrera?.nombre || "",
       marginLeft + colWidth + 25,
       currentY + 7
     );
@@ -102,7 +99,7 @@ function ViewEstudianteComponent({ estudiante }) {
     doc.text("TURNO:", marginLeft + colWidth * 2 + 2, currentY + 7);
     doc.setFont("Helvetica", "normal");
     doc.text(
-      estudiante?.turno || "N/A",
+      estudiante?.turno || "",
       marginLeft + colWidth * 2 + 20,
       currentY + 7
     );
@@ -130,7 +127,7 @@ function ViewEstudianteComponent({ estudiante }) {
     doc.text("DATOS PERSONALES", marginLeft, currentY);
     currentY += 5;
     doc.setLineWidth(0.3);
-    doc.line(marginLeft, currentY, pageWidth - marginRight, currentY);
+    // doc.line(marginLeft, currentY, pageWidth - marginRight, currentY);
     currentY += 5;
 
     // ----------------------------------------------------------------------------
@@ -211,18 +208,14 @@ function ViewEstudianteComponent({ estudiante }) {
     doc.setFont("Helvetica", "bold");
     doc.text("CARNET:", marginLeft + 2, currentY + 5);
     doc.setFont("Helvetica", "normal");
-    doc.text(
-      estudiante?.carnet_identidad || "N/A",
-      marginLeft + 2,
-      currentY + 10
-    );
+    doc.text(estudiante?.carnet_identidad || "", marginLeft + 2, currentY + 10);
 
     // Gestión
     doc.setFont("Helvetica", "bold");
     doc.text("GESTIÓN:", marginLeft + col4Width + 2, currentY + 5);
     doc.setFont("Helvetica", "normal");
     doc.text(
-      estudiante?.gestion?.toString() || "N/A",
+      estudiante?.gestion?.toString() || "",
       marginLeft + col4Width + 2,
       currentY + 10
     );
@@ -232,7 +225,7 @@ function ViewEstudianteComponent({ estudiante }) {
     doc.text("NIVEL:", marginLeft + col4Width * 2 + 2, currentY + 5);
     doc.setFont("Helvetica", "normal");
     doc.text(
-      estudiante?.nivel || "N/A",
+      estudiante?.nivel || "",
       marginLeft + col4Width * 2 + 2,
       currentY + 10
     );
@@ -242,7 +235,7 @@ function ViewEstudianteComponent({ estudiante }) {
     doc.text("AÑO EGRESO:", marginLeft + col4Width * 3 + 2, currentY + 5);
     doc.setFont("Helvetica", "normal");
     doc.text(
-      estudiante?.anio_egreso?.toString() || "N/A",
+      estudiante?.anio_egreso?.toString() || "",
       marginLeft + col4Width * 3 + 2,
       currentY + 10
     );
@@ -256,7 +249,7 @@ function ViewEstudianteComponent({ estudiante }) {
     doc.text("DOMICILIO", marginLeft, currentY);
     currentY += 5;
     doc.setLineWidth(0.3);
-    doc.line(marginLeft, currentY, pageWidth - marginRight, currentY);
+    // doc.line(marginLeft, currentY, pageWidth - marginRight, currentY);
     currentY += 5;
 
     const domRowHeight = 14;
@@ -284,14 +277,14 @@ function ViewEstudianteComponent({ estudiante }) {
     doc.setFont("Helvetica", "bold");
     doc.text("AVENIDA/CALLE", marginLeft + 2, currentY + 5);
     doc.setFont("Helvetica", "normal");
-    doc.text(estudiante?.domicilio || "N/A", marginLeft + 2, currentY + 10);
+    doc.text(estudiante?.domicilio || "", marginLeft + 2, currentY + 10);
 
     // Zona
     doc.setFont("Helvetica", "bold");
     doc.text("ZONA", marginLeft + colDomWidth + 2, currentY + 5);
     doc.setFont("Helvetica", "normal");
     doc.text(
-      estudiante?.zona || "N/A",
+      estudiante?.zona || "",
       marginLeft + colDomWidth + 2,
       currentY + 10
     );
@@ -305,7 +298,7 @@ function ViewEstudianteComponent({ estudiante }) {
     );
     doc.setFont("Helvetica", "normal");
     doc.text(
-      estudiante?.correo || "N/A",
+      estudiante?.correo || "",
       marginLeft + colDomWidth * 2 + 2,
       currentY + 10
     );
@@ -318,7 +311,7 @@ function ViewEstudianteComponent({ estudiante }) {
     doc.setFont("Helvetica", "bold");
     doc.text("OTROS DATOS", marginLeft, currentY);
     currentY += 5;
-    doc.line(marginLeft, currentY, pageWidth - marginRight, currentY);
+    // doc.line(marginLeft, currentY, pageWidth - marginRight, currentY);
     currentY += 5;
 
     // Fila 1: Estado Civil, Apoderado, Número Apoderado
@@ -347,7 +340,7 @@ function ViewEstudianteComponent({ estudiante }) {
     doc.setFont("Helvetica", "bold");
     doc.text("ESTADO CIVIL", marginLeft + 2, currentY + 5);
     doc.setFont("Helvetica", "normal");
-    doc.text(estudiante?.estado_civil || "N/A", marginLeft + 2, currentY + 10);
+    doc.text(estudiante?.estado_civil || "", marginLeft + 2, currentY + 10);
 
     // Apoderado
     doc.setFont("Helvetica", "bold");
@@ -366,7 +359,7 @@ function ViewEstudianteComponent({ estudiante }) {
     doc.text("N° APODERADO", marginLeft + colOtrosWidth * 2 + 2, currentY + 5);
     doc.setFont("Helvetica", "normal");
     doc.text(
-      estudiante?.numero_apoderado || "N/A",
+      estudiante?.numero_apoderado || "",
       marginLeft + colOtrosWidth * 2 + 2,
       currentY + 10
     );
@@ -398,14 +391,14 @@ function ViewEstudianteComponent({ estudiante }) {
     doc.setFont("Helvetica", "bold");
     doc.text("SEXO", marginLeft + 2, currentY + 5);
     doc.setFont("Helvetica", "normal");
-    doc.text(estudiante?.sexo || "N/A", marginLeft + 2, currentY + 10);
+    doc.text(estudiante?.sexo || "", marginLeft + 2, currentY + 10);
 
     // Celular
     doc.setFont("Helvetica", "bold");
     doc.text("CELULAR", marginLeft + colOtrosWidth + 2, currentY + 5);
     doc.setFont("Helvetica", "normal");
     doc.text(
-      estudiante?.celular || "N/A",
+      estudiante?.celular || "",
       marginLeft + colOtrosWidth + 2,
       currentY + 10
     );
@@ -415,7 +408,7 @@ function ViewEstudianteComponent({ estudiante }) {
     doc.text("RU", marginLeft + colOtrosWidth * 2 + 2, currentY + 5);
     doc.setFont("Helvetica", "normal");
     doc.text(
-      estudiante?.ru || "N/A",
+      estudiante?.ru || "",
       marginLeft + colOtrosWidth * 2 + 2,
       currentY + 10
     );
@@ -597,9 +590,7 @@ function ViewEstudianteComponent({ estudiante }) {
         <DialogContent>
           <FormEstudianteCarreraComponent
             handleClose={() => setOpenEditDialog(false)}
-            refetchEstudiantes={() => {
-              /* aquí puedes invocar la función para refrescar la data */
-            }}
+            refetchEstudiantes={refetchEstudiantes}
             estudiante={estudiante} // Se envía el estudiante para edición
           />
         </DialogContent>

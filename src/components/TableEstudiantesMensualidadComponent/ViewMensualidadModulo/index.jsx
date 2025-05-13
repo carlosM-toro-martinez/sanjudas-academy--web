@@ -13,199 +13,344 @@ import {
   Button,
   TextField,
   Grid,
+  Dialog,
+  DialogContent,
+  Collapse,
+  IconButton,
 } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { useMutation } from "react-query";
 import pagoMensualidadDeleteService from "../../../async/services/delete/pagoMensualidadDeleteService.js";
 import pagoMensualidadUpdateService from "../../../async/services/put/pagoMensualidadUpdateService.js";
+import pagoParcialAddService from "../../../async/services/post/pagoParcialAddService.js";
 import { getLocalDateTime } from "../../../utils/getDate.js";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import logo from "../../../assets/images/logos/3.png";
 
-function ViewMensualidadModulo({
+export default function ViewMensualidadModulo({
   estudiantes,
   refetchMensualidades,
   handleClose,
 }) {
-  const [editingId, setEditingId] = useState(null);
-  const [editMonto, setEditMonto] = useState({});
+  const [expandedId, setExpandedId] = useState(null);
+  const [partialInputs, setPartialInputs] = useState({});
+  const [pdfBlob, setPdfBlob] = useState(null);
+  const [openPdf, setOpenPdf] = useState(false);
 
-  const mutationDelete = useMutation(pagoMensualidadDeleteService, {
+  // Mutations
+  const deleteMutation = useMutation(pagoMensualidadDeleteService, {
     onSuccess: () => {
-      // setSnackbar({
-      //   open: true,
-      //   message: "¡Pago de mensualidad creado exitosamente!",
-      //   severity: "success",
-      // });
-      if (handleClose) {
-        handleClose();
-      }
+      if (handleClose) handleClose();
       refetchMensualidades();
-      handleCancel();
-    },
-    onError: (error) => {
-      // setSnackbar({
-      //   open: true,
-      //   message: `Error al crear el pago: ${error.message}`,
-      //   severity: "error",
-      // });
     },
   });
 
-  const mutation = useMutation(({ id, data }) =>
-    pagoMensualidadUpdateService(id, data)
+  const updateMutation = useMutation(
+    ({ id, data }) => pagoMensualidadUpdateService(id, data),
+    {
+      onSuccess: () => refetchMensualidades(),
+    }
   );
 
-  const handleEdit = (id, monto) => {
-    setEditingId(id);
-    setEditMonto({ ...editMonto, [id]: monto });
-  };
+  const addParcialMutation = useMutation(
+    ({ id_pago, monto, observacion }) =>
+      pagoParcialAddService({
+        id_pago,
+        monto,
+        observacion,
+        fecha_pago: getLocalDateTime(),
+      }),
+    {
+      onSuccess: (nuevoParcial) => {
+        refetchMensualidades();
 
-  const handleDelete = (id) => {
-    mutationDelete.mutate(id);
-  };
+        setPartialInputs((prev) => ({
+          ...prev,
+          [expandedId]: { monto: "", observacion: "" },
+        }));
 
-  const handleSave = (pago) => {
-    console.log(pago);
+        const mensualidadPadre = estudiantes.estudianteMensualidad.find(
+          (m) => m.id_pago === nuevoParcial.id_pago
+        );
 
-    const updatedPago = {
-      id_pago: pago.id_pago,
-      monto: editMonto[pago.id_pago],
-      observacion: `Primer pago: ${new Date(pago.fecha_pago).toLocaleDateString(
-        "es-BO"
-      )}`,
-      fecha_pago: getLocalDateTime(),
-    };
-    mutation.mutate(
-      { id: pago.id_pago, data: updatedPago },
-      {
-        onSuccess: () => {
-          refetchMensualidades();
-          handleClose();
-        },
-      }
-    );
+        const pdfData = {
+          modulo: mensualidadPadre.modulo,
+          fecha_pago: nuevoParcial.fecha_pago,
+          monto: nuevoParcial.monto,
+          observacion: nuevoParcial.observacion,
+        };
 
-    refetchMensualidades();
-    setEditingId(null);
-  };
-
-  const handleCancel = () => {
-    if (handleClose) {
-      handleClose();
+        generarPDF(pdfData);
+      },
     }
+  );
+
+  const handleExpand = (id) => {
+    setExpandedId(expandedId === id ? null : id);
   };
-  const sortedMensualidad = [...estudiantes.estudianteMensualidad].sort(
+
+  const handlePartialChange = (id, field, value) => {
+    setPartialInputs((prev) => ({
+      ...prev,
+      [id]: { ...prev[id], [field]: value },
+    }));
+  };
+
+  const handleAddParcial = (id_pago) => {
+    const input = partialInputs[id_pago] || {};
+    addParcialMutation.mutate({
+      id_pago,
+      monto: input.monto,
+      observacion: input.observacion,
+    });
+  };
+
+  const generarPDF = (data) => {
+    const doc = new jsPDF();
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("SAINT JUDE THADDEE", 14, 20);
+    doc.addImage(logo, "PNG", 160, 10, 28, 28);
+    doc.setFontSize(12);
+    doc.text("Recibo de Pago de Mensualidad", 14, 30);
+    doc.autoTable({
+      startY: 40,
+      head: [["Campo", "Valor"]],
+      body: [
+        [
+          "Estudiante",
+          `${estudiantes.nombre} ${estudiantes.apellido_paterno} ${estudiantes.apellido_materno}`,
+        ],
+        ["Módulo", data.modulo],
+        ["Fecha de Pago", data.fecha_pago],
+        ["Monto", `Bs. ${data.monto}`],
+        ["Observación", data.observacion || "-"],
+      ],
+      theme: "striped",
+      styles: { fontSize: 11, cellPadding: 4 },
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: [255, 255, 255],
+        fontStyle: "bold",
+      },
+      alternateRowStyles: { fillColor: [245, 245, 245] },
+      margin: { top: 40 },
+    });
+    doc.setFontSize(10);
+    doc.text(
+      "Gracias por su pago. Este recibo es generado automáticamente.",
+      14,
+      doc.internal.pageSize.height - 20
+    );
+    setPdfBlob(doc.output("blob"));
+    setOpenPdf(true);
+  };
+
+  const mensualidadesOrdenadas = [...estudiantes.estudianteMensualidad].sort(
     (a, b) => a.id_pago - b.id_pago
   );
+
   return (
     <Box p={3}>
-      <Paper elevation={3} style={{ padding: "24px" }}>
-        <Typography variant="h5" gutterBottom>
-          Detalle del Estudiante
+      <Paper elevation={3} sx={{ p: 3 }}>
+        <Typography variant="h5">Detalle del Estudiante</Typography>
+        <Divider sx={{ my: 2 }} />
+        <Typography>
+          <strong>Nombre:</strong> {estudiantes.nombre}
         </Typography>
-        <Divider style={{ marginBottom: "16px" }} />
-        <Box mb={2}>
-          <Typography variant="body1">
-            <strong>Nombre:</strong> {estudiantes.nombre}
-          </Typography>
-          <Typography variant="body1">
-            <strong>Correo:</strong> {estudiantes.correo}
-          </Typography>
-        </Box>
-        <Divider style={{ margin: "16px 0" }} />
-        <Typography variant="h6" gutterBottom>
-          Pagos de Mensualidad
+        <Typography>
+          <strong>Correo:</strong> {estudiantes.correo || "-"}
         </Typography>
+        <Divider sx={{ my: 2 }} />
+        <Typography variant="h6">Pagos de Mensualidad</Typography>
         <TableContainer>
           <Table>
-            <TableHead style={{ backgroundColor: "#1976d2" }}>
+            <TableHead sx={{ backgroundColor: "#1976d2" }}>
               <TableRow>
-                <TableCell style={{ color: "#fff", fontWeight: "bold" }}>
+                <TableCell />
+                <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>
                   Módulo
                 </TableCell>
-                <TableCell style={{ color: "#fff", fontWeight: "bold" }}>
-                  Observación
+                <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>
+                  Fecha
                 </TableCell>
-                <TableCell style={{ color: "#fff", fontWeight: "bold" }}>
-                  Fecha de Pago
+                <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>
+                  Monto Total
                 </TableCell>
-                <TableCell style={{ color: "#fff", fontWeight: "bold" }}>
-                  Monto
-                </TableCell>
-                <TableCell style={{ color: "#fff", fontWeight: "bold" }}>
+                <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>
                   Acciones
                 </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {sortedMensualidad.map((pago) => (
-                <TableRow key={pago.id_pago}>
-                  <TableCell>{pago.modulo}</TableCell>
-                  <TableCell>{pago.observacion || "-"}</TableCell>
-                  <TableCell>
-                    {new Date(pago.fecha_pago).toLocaleDateString("es-BO")}
-                  </TableCell>
-                  <TableCell
-                    style={{ color: pago?.monto < 380 ? "red" : "green" }}
-                  >
-                    {editingId === pago.id_pago ? (
-                      <TextField
-                        type="number"
-                        value={editMonto[pago.id_pago] || pago.monto}
-                        onChange={(e) =>
-                          setEditMonto({
-                            ...editMonto,
-                            [pago.id_pago]: e.target.value,
-                          })
-                        }
+              {mensualidadesOrdenadas.map((pago) => (
+                <React.Fragment key={pago.id_pago}>
+                  <TableRow>
+                    <TableCell>
+                      <IconButton
                         size="small"
-                      />
-                    ) : (
-                      `$${pago.monto}`
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {editingId === pago.id_pago ? (
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => handleSave(pago)}
-                        disabled={mutation.isLoading}
+                        onClick={() => handleExpand(pago.id_pago)}
                       >
-                        Guardar
+                        {expandedId === pago.id_pago ? (
+                          <ExpandLessIcon />
+                        ) : (
+                          <ExpandMoreIcon />
+                        )}
+                      </IconButton>
+                    </TableCell>
+                    <TableCell>{pago.modulo}</TableCell>
+                    <TableCell>
+                      {new Date(pago.fecha_pago).toLocaleDateString("es-BO")}
+                    </TableCell>
+                    <TableCell>{`Bs. ${pago.monto}`}</TableCell>
+                    <TableCell>
+                      <Button size="small" onClick={() => generarPDF(pago)}>
+                        Imprimir
                       </Button>
-                    ) : (
                       <Button
-                        variant="outlined"
-                        color="primary"
                         size="small"
-                        style={{ marginRight: "8px" }}
-                        onClick={() => handleEdit(pago.id_pago, pago.monto)}
+                        color="error"
+                        onClick={() => deleteMutation.mutate(pago.id_pago)}
                       >
-                        Editar
+                        Eliminar
                       </Button>
-                    )}
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      size="small"
-                      onClick={() => handleDelete(pago.id_pago)}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell
+                      style={{ paddingBottom: 0, paddingTop: 0 }}
+                      colSpan={5}
                     >
-                      Eliminar
-                    </Button>
-                  </TableCell>
-                </TableRow>
+                      <Collapse
+                        in={expandedId === pago.id_pago}
+                        timeout="auto"
+                        unmountOnExit
+                      >
+                        <Box margin={2}>
+                          {/* Lista de pagos parciales */}
+                          <Typography variant="subtitle1">
+                            Pagos Parciales
+                          </Typography>
+                          <Table size="small">
+                            <TableHead>
+                              <TableRow>
+                                <TableCell>Fecha</TableCell>
+                                <TableCell>Monto</TableCell>
+                                <TableCell>Observación</TableCell>
+                                <TableCell />
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              {pago.pagos_parciales.map((par) => (
+                                <TableRow key={par.id_pago_parcial}>
+                                  <TableCell>
+                                    {new Date(
+                                      par.fecha_pago
+                                    ).toLocaleDateString("es-BO")}
+                                  </TableCell>
+                                  <TableCell>{`Bs. ${par.monto}`}</TableCell>
+                                  <TableCell>
+                                    {par.observacion || "-"}
+                                  </TableCell>
+                                  <TableCell />
+                                </TableRow>
+                              ))}
+                              {/* Formulario para nuevo pago parcial */}
+                              <TableRow>
+                                <TableCell>
+                                  <TextField
+                                    type="date"
+                                    size="small"
+                                    value={
+                                      partialInputs[pago.id_pago]?.fecha_pago ||
+                                      getLocalDateTime().split(" ")[0]
+                                    }
+                                    disabled
+                                  />
+                                </TableCell>
+                                <TableCell>
+                                  <TextField
+                                    type="number"
+                                    size="small"
+                                    placeholder="Monto"
+                                    value={
+                                      partialInputs[pago.id_pago]?.monto || ""
+                                    }
+                                    onChange={(e) =>
+                                      handlePartialChange(
+                                        pago.id_pago,
+                                        "monto",
+                                        e.target.value
+                                      )
+                                    }
+                                  />
+                                </TableCell>
+                                <TableCell>
+                                  <TextField
+                                    size="small"
+                                    placeholder="Observación"
+                                    value={
+                                      partialInputs[pago.id_pago]
+                                        ?.observacion || ""
+                                    }
+                                    onChange={(e) =>
+                                      handlePartialChange(
+                                        pago.id_pago,
+                                        "observacion",
+                                        e.target.value
+                                      )
+                                    }
+                                  />
+                                </TableCell>
+                                <TableCell>
+                                  <Button
+                                    size="small"
+                                    variant="contained"
+                                    onClick={() =>
+                                      handleAddParcial(pago.id_pago)
+                                    }
+                                    disabled={addParcialMutation.isLoading}
+                                  >
+                                    Agregar Pago
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            </TableBody>
+                          </Table>
+                        </Box>
+                      </Collapse>
+                    </TableCell>
+                  </TableRow>
+                </React.Fragment>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
-        <Grid item xs={6}>
-          <Button variant="contained" color="error" onClick={handleCancel}>
-            Cancelar
+        <Box mt={2}>
+          <Button variant="outlined" color="error" onClick={handleClose}>
+            Cerrar
           </Button>
-        </Grid>
+        </Box>
       </Paper>
+      <Dialog
+        open={openPdf}
+        onClose={() => setOpenPdf(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogContent>
+          {pdfBlob && (
+            <iframe
+              src={URL.createObjectURL(pdfBlob)}
+              width="100%"
+              height="500px"
+              title="PDF"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 }
-
-export default ViewMensualidadModulo;
